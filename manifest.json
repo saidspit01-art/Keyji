@@ -1,0 +1,24 @@
+{
+  "name": "Keyji",
+  "short_name": "Keyji",
+  "description": "Keyji Messenger — общайся в атмосфере японского спокойствия",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#FF6B00",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/GQ3T21qm/file-00000000ea2472469cbca4c0cbe8b34e.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://i.ibb.co/GQ3T21qm/file-00000000ea2472469cbca4c0cbe8b34e.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ],
+  "categories": ["social", "communication"],
+  "lang": "ru"
+}
