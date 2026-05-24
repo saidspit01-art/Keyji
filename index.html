@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Keyji" />
-  <link rel="icon" type="image/png" href="https://KeyjiCompany.github.io/keyji/logo.png" />
-  <link rel="apple-touch-icon" href="https://KeyjiCompany.github.io/keyji/logo.png" />
+  <link rel="icon" type="image/png" href="./logo.png" />
+  <link rel="apple-touch-icon" href="./logo.png" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *{ margin:0; padding:0; box-sizing:border-box; }
@@ -23,8 +23,8 @@
     .splash-logo{ width:120px; height:120px; border-radius:28px; object-fit:cover; animation:pulse 1.6s infinite alternate; }
     @keyframes pulse{ from{ transform:scale(0.95); opacity:0.8; } to{ transform:scale(1.05); opacity:1; } }
 
-    #login-screen{ position:fixed; inset:0; opacity:0; transition:1s; }
-    #login-screen.show{ opacity:1; }
+    #login-screen{ position:fixed; inset:0; opacity:0; transition:1s; pointer-events:none; }
+    #login-screen.show{ opacity:1; pointer-events:all; }
     .bg{ position:absolute; inset:0; background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg'); background-size:cover; background-position:center; }
     .overlay{ position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.15), rgba(0,0,0,0.75), rgba(0,0,0,0.95)); }
     .content{ position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:space-between; padding:60px 28px 50px; }
@@ -36,7 +36,6 @@
     .btn{ width:100%; border:none; border-radius:18px; padding:17px; cursor:pointer; font-size:15px; font-weight:700; margin-bottom:14px; transition:0.25s; font-family:'Montserrat',sans-serif; }
     .btn:active{ transform:scale(0.98); }
     .btn-primary{ background:var(--orange); color:white; }
-    .btn-primary:hover{ background:var(--orange-light); }
     .btn-secondary{ background:var(--glass); color:white; border:1px solid var(--glass-border); backdrop-filter:blur(20px); }
     .divider{ text-align:center; color:rgba(255,255,255,0.35); margin-bottom:14px; font-size:12px; }
 
@@ -56,23 +55,34 @@
     .input:focus{ border-color:var(--orange); }
     .submit{ width:100%; padding:17px; border:none; border-radius:18px; background:var(--orange); color:white; font-size:15px; font-weight:700; margin-top:10px; cursor:pointer; font-family:'Montserrat',sans-serif; transition:0.2s; }
     .submit:active{ transform:scale(0.98); background:var(--orange-light); }
+    .submit:disabled{ opacity:0.6; }
     .terms{ margin-top:18px; text-align:center; color:rgba(255,255,255,0.35); font-size:11px; line-height:1.6; }
     .terms span{ color:var(--orange); cursor:pointer; }
     #register-fields{ display:none; }
     #register-fields.show{ display:block; }
-
-    /* Google btn */
     .google-btn{ width:100%; padding:14px; border-radius:16px; border:1px solid var(--glass-border); background:var(--glass); backdrop-filter:blur(10px); color:white; font-family:'Montserrat',sans-serif; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px; transition:0.2s; }
     .google-btn:active{ background:rgba(255,255,255,0.15); transform:scale(0.97); }
     .or-divider{ display:flex; align-items:center; gap:12px; margin:14px 0 4px; }
     .or-line{ flex:1; height:1px; background:var(--glass-border); }
     .or-text{ font-size:12px; color:rgba(255,255,255,0.3); font-weight:600; }
+
+    /* ERROR / SUCCESS */
+    .toast{ position:fixed; top:24px; left:50%; transform:translateX(-50%); z-index:9999; padding:12px 24px; border-radius:14px; font-size:14px; font-weight:600; font-family:'Montserrat',sans-serif; white-space:nowrap; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+    .toast.show{ opacity:1; }
+    .toast.error{ background:#e53935; color:white; }
+    .toast.success{ background:#43a047; color:white; }
+
+    /* LOADING */
+    .spinner{ display:inline-block; width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.6s linear infinite; margin-right:8px; vertical-align:middle; }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
   </style>
 </head>
 <body>
 
+  <div id="toast" class="toast"></div>
+
   <div id="splash">
-    <img class="splash-logo" src="https://KeyjiCompany.github.io/keyji/logo.png" alt="Keyji">
+    <img class="splash-logo" src="./logo.png" alt="Keyji">
   </div>
 
   <div id="login-screen">
@@ -80,7 +90,7 @@
     <div class="overlay"></div>
     <div class="content">
       <div class="top">
-        <img class="logo" src="https://KeyjiCompany.github.io/keyji/logo.png" alt="Keyji">
+        <img class="logo" src="./logo.png" alt="Keyji">
         <div class="title">Keyji</div>
         <div class="subtitle">MESSENGER</div>
       </div>
@@ -104,28 +114,28 @@
       <div id="register-fields">
         <div class="field">
           <label class="label">Имя</label>
-          <input class="input" type="text" placeholder="Ваше имя">
+          <input class="input" type="text" id="inp-name" placeholder="Ваше имя">
         </div>
         <div class="field">
           <label class="label">Юзернейм</label>
-          <input class="input" type="text" placeholder="@username">
+          <input class="input" type="text" id="inp-username" placeholder="@username">
         </div>
       </div>
       <div class="field">
         <label class="label">Email</label>
-        <input class="input" type="email" placeholder="example@email.com">
+        <input class="input" type="email" id="inp-email" placeholder="example@email.com">
       </div>
       <div class="field">
         <label class="label">Пароль</label>
-        <input class="input" type="password" placeholder="••••••••">
+        <input class="input" type="password" id="inp-password" placeholder="••••••••">
       </div>
-      <button class="submit" id="submit-btn">Войти</button>
+      <button class="submit" id="submit-btn" onclick="handleSubmit()">Войти</button>
       <div class="or-divider">
         <div class="or-line"></div>
         <div class="or-text">ИЛИ</div>
         <div class="or-line"></div>
       </div>
-      <button class="google-btn">
+      <button class="google-btn" onclick="handleGoogle()">
         <svg width="18" height="18" viewBox="0 0 48 48">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -140,7 +150,150 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrWwIDh_Y8Fji0KWiVbR2EcmUHl5c6mHM",
+      authDomain: "keyji-974fb.firebaseapp.com",
+      projectId: "keyji-974fb",
+      storageBucket: "keyji-974fb.firebasestorage.app",
+      messagingSenderId: "442818696289",
+      appId: "1:442818696289:web:5ed15e6e31fb85ef2bc620"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // Check if already logged in
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        const onboarded = localStorage.getItem('keyji_onboarded');
+        if (!onboarded) {
+          window.location.href = './onboarding.html';
+        } else {
+          window.location.href = './chats.html';
+        }
+      }
+    });
+
+    function showToast(msg, type='error') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function setLoading(loading) {
+      const btn = document.getElementById('submit-btn');
+      const isLogin = document.getElementById('login-tab').classList.contains('active');
+      if (loading) {
+        btn.innerHTML = '<span class="spinner"></span>' + (isLogin ? 'Входим...' : 'Создаём...');
+        btn.disabled = true;
+      } else {
+        btn.innerHTML = isLogin ? 'Войти' : 'Создать аккаунт';
+        btn.disabled = false;
+      }
+    }
+
+    window.handleSubmit = async function() {
+      const isLogin = document.getElementById('login-tab').classList.contains('active');
+      const email = document.getElementById('inp-email').value.trim();
+      const password = document.getElementById('inp-password').value;
+
+      if (!email || !password) {
+        showToast('Заполните все поля!');
+        return;
+      }
+
+      setLoading(true);
+
+      if (isLogin) {
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          showToast('Добро пожаловать! 🏮', 'success');
+        } catch(e) {
+          let msg = 'Ошибка входа';
+          if (e.code === 'auth/user-not-found') msg = 'Пользователь не найден';
+          if (e.code === 'auth/wrong-password') msg = 'Неверный пароль';
+          if (e.code === 'auth/invalid-email') msg = 'Неверный email';
+          if (e.code === 'auth/invalid-credential') msg = 'Неверный email или пароль';
+          showToast(msg);
+          setLoading(false);
+        }
+      } else {
+        const name = document.getElementById('inp-name').value.trim();
+        const username = document.getElementById('inp-username').value.trim().replace('@','').toLowerCase();
+
+        if (!name || !username) {
+          showToast('Заполните все поля!');
+          setLoading(false);
+          return;
+        }
+        if (username.length < 3) {
+          showToast('Юзернейм минимум 3 символа');
+          setLoading(false);
+          return;
+        }
+        if (password.length < 6) {
+          showToast('Пароль минимум 6 символов');
+          setLoading(false);
+          return;
+        }
+
+        try {
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+          await updateProfile(cred.user, { displayName: name });
+          await setDoc(doc(db, 'users', cred.user.uid), {
+            uid: cred.user.uid,
+            name, username, email,
+            bio: '', avatar: '', photos: [],
+            verified: false, frozen: false,
+            hideEmail: false, hideCountry: true, hideOnline: false,
+            createdAt: serverTimestamp(),
+            lastSeen: serverTimestamp(),
+            online: true,
+            lang: localStorage.getItem('keyji_lang') || 'ru'
+          });
+          showToast('Аккаунт создан! 🌸', 'success');
+        } catch(e) {
+          let msg = 'Ошибка регистрации';
+          if (e.code === 'auth/email-already-in-use') msg = 'Email уже используется';
+          if (e.code === 'auth/invalid-email') msg = 'Неверный email';
+          if (e.code === 'auth/weak-password') msg = 'Слабый пароль';
+          showToast(msg);
+          setLoading(false);
+        }
+      }
+    };
+
+    window.handleGoogle = async function() {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists()) {
+          const username = 'user' + Math.floor(Math.random()*99999);
+          await setDoc(doc(db, 'users', user.uid), {
+            uid: user.uid, name: user.displayName || 'User',
+            username, email: user.email, bio: '', avatar: user.photoURL || '',
+            photos: [], verified: false, frozen: false,
+            hideEmail: false, hideCountry: true, hideOnline: false,
+            createdAt: serverTimestamp(), lastSeen: serverTimestamp(), online: true,
+            lang: localStorage.getItem('keyji_lang') || 'ru'
+          });
+        }
+        showToast('Добро пожаловать! 🏮', 'success');
+      } catch(e) {
+        showToast('Ошибка Google входа');
+      }
+    };
+
+    // Splash
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('splash').classList.add('hide');
@@ -148,16 +301,22 @@
       }, 1800);
     });
 
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      });
+    }
+  </script>
+
+  <script>
     function openAuth(lang) {
       localStorage.setItem('keyji_lang', lang);
       document.getElementById('auth').classList.add('show');
       switchTab('login');
     }
-
     function closeAuth() {
       document.getElementById('auth').classList.remove('show');
     }
-
     function switchTab(tab) {
       const login = tab === 'login';
       document.getElementById('login-tab').classList.toggle('active', login);
@@ -166,17 +325,6 @@
       document.getElementById('auth-title').textContent = login ? 'Войти' : 'Регистрация';
       document.getElementById('submit-btn').textContent = login ? 'Войти' : 'Создать аккаунт';
     }
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('[Keyji] SW registered'))
-          .catch(e => console.log('[Keyji] SW error', e));
-      });
-    }
   </script>
-
-<script type="module" src="firebase.js"></script>
-
 </body>
 </html>
