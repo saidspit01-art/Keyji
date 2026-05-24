@@ -1,0 +1,446 @@
+cat > /mnt/user-data/outputs/settings.html << 'ENDOFFILE'
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Keyji — Настройки</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    :root { --orange:#FF6B00; --orange-light:#FF8C38; }
+    body { font-family:'Montserrat',sans-serif; min-height:100vh; overflow-x:hidden; background:#f5f0eb; }
+    body.dark { background:#0a0a0a; }
+
+    .bg-image {
+      position:fixed; inset:0; z-index:0;
+      background-size:cover; background-position:center;
+    }
+    body.light .bg-image { background-image:url('https://i.ibb.co/zTS53bWc/file-000000004b807246a5c9c164255caecf.jpg'); }
+    body.dark .bg-image { background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg'); }
+    body.light .bg-overlay { background:rgba(255,255,255,0.25); }
+    body.dark .bg-overlay { background:rgba(0,0,0,0.5); }
+    .bg-overlay { position:fixed; inset:0; z-index:1; }
+
+    .app { position:relative; z-index:2; min-height:100vh; padding-bottom:40px; }
+
+    /* HEADER */
+    .header {
+      display:flex; align-items:center; gap:12px;
+      padding:52px 16px 16px;
+      position:sticky; top:0; z-index:10;
+      background:rgba(255,255,255,0.5);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(255,255,255,0.6);
+    }
+    body.dark .header { background:rgba(0,0,0,0.55); border-bottom-color:rgba(255,255,255,0.08); }
+
+    .back-btn {
+      width:38px; height:38px; border-radius:12px;
+      border:1px solid rgba(255,255,255,0.5);
+      background:rgba(255,255,255,0.3); backdrop-filter:blur(10px);
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; cursor:pointer; color:#333; transition:all 0.2s; flex-shrink:0;
+    }
+    body.dark .back-btn { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); color:white; }
+    .back-btn:active { transform:scale(0.92); }
+
+    .header-title { font-family:'Noto Serif JP',serif; font-size:20px; font-weight:700; color:#1a1a1a; }
+    body.dark .header-title { color:white; }
+
+    /* PROFILE CARD */
+    .profile-card {
+      margin:16px 16px 8px;
+      padding:20px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.55);
+      border:1px solid rgba(255,255,255,0.7);
+      backdrop-filter:blur(16px);
+      display:flex; align-items:center; gap:16px;
+      cursor:pointer; transition:all 0.2s;
+    }
+    body.dark .profile-card { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.12); }
+    .profile-card:active { transform:scale(0.98); }
+
+    .profile-avatar-wrap { position:relative; }
+    .profile-avatar {
+      width:68px; height:68px; border-radius:20px;
+      background:linear-gradient(135deg,var(--orange),#ff3d00);
+      display:flex; align-items:center; justify-content:center;
+      font-size:28px; font-weight:700; color:white;
+      border:2px solid rgba(255,255,255,0.4);
+    }
+    .avatar-edit {
+      position:absolute; bottom:-4px; right:-4px;
+      width:22px; height:22px; border-radius:50%;
+      background:var(--orange); color:white;
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; border:2px solid white;
+    }
+
+    .profile-info { flex:1; min-width:0; }
+    .profile-name { font-size:17px; font-weight:700; color:#1a1a1a; margin-bottom:3px; }
+    body.dark .profile-name { color:white; }
+    .profile-username { font-size:13px; color:var(--orange); font-weight:600; margin-bottom:3px; }
+    .profile-bio { font-size:12px; color:#888; }
+    body.dark .profile-bio { color:rgba(255,255,255,0.4); }
+    .profile-arrow { font-size:18px; color:#ccc; }
+
+    /* SECTION */
+    .section { margin:8px 16px 0; }
+    .section-title {
+      font-size:11px; font-weight:700; color:var(--orange);
+      letter-spacing:1.5px; text-transform:uppercase;
+      padding:12px 4px 8px;
+    }
+    .section-card {
+      background:rgba(255,255,255,0.55);
+      border:1px solid rgba(255,255,255,0.7);
+      backdrop-filter:blur(16px);
+      border-radius:18px; overflow:hidden;
+    }
+    body.dark .section-card { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.1); }
+
+    .setting-item {
+      display:flex; align-items:center; gap:14px;
+      padding:14px 16px; cursor:pointer;
+      transition:background 0.15s; position:relative;
+    }
+    .setting-item:not(:last-child)::after {
+      content:''; position:absolute; bottom:0; left:54px; right:0;
+      height:1px; background:rgba(0,0,0,0.06);
+    }
+    body.dark .setting-item:not(:last-child)::after { background:rgba(255,255,255,0.06); }
+    .setting-item:active { background:rgba(255,107,0,0.06); }
+
+    .setting-icon {
+      width:36px; height:36px; border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; flex-shrink:0;
+    }
+    .setting-icon.orange { background:rgba(255,107,0,0.15); }
+    .setting-icon.blue { background:rgba(66,133,244,0.15); }
+    .setting-icon.green { background:rgba(52,168,83,0.15); }
+    .setting-icon.red { background:rgba(229,57,53,0.15); }
+    .setting-icon.purple { background:rgba(156,39,176,0.15); }
+    .setting-icon.gray { background:rgba(0,0,0,0.08); }
+    body.dark .setting-icon.gray { background:rgba(255,255,255,0.08); }
+
+    .setting-info { flex:1; min-width:0; }
+    .setting-label { font-size:14px; font-weight:600; color:#1a1a1a; }
+    body.dark .setting-label { color:rgba(255,255,255,0.9); }
+    .setting-sub { font-size:12px; color:#999; margin-top:2px; }
+    body.dark .setting-sub { color:rgba(255,255,255,0.35); }
+
+    .setting-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .setting-arrow { color:#ccc; font-size:14px; }
+    body.dark .setting-arrow { color:rgba(255,255,255,0.2); }
+    .setting-value { font-size:13px; color:#aaa; font-weight:500; }
+    body.dark .setting-value { color:rgba(255,255,255,0.3); }
+
+    /* Toggle */
+    .toggle-switch {
+      width:44px; height:24px; border-radius:12px;
+      background:#ddd; position:relative; transition:background 0.3s; cursor:pointer;
+      flex-shrink:0;
+    }
+    .toggle-switch.on { background:var(--orange); }
+    .toggle-knob {
+      position:absolute; top:3px; left:3px;
+      width:18px; height:18px; border-radius:9px;
+      background:white; transition:left 0.3s ease;
+      box-shadow:0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-switch.on .toggle-knob { left:23px; }
+
+    /* Danger */
+    .setting-item.danger .setting-label { color:#e53935; }
+
+    /* Sub page */
+    .sub-page {
+      position:fixed; inset:0; z-index:50;
+      transform:translateX(100%); transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      overflow-y:auto;
+    }
+    .sub-page.open { transform:translateX(0); }
+    .sub-page .bg-image { background-image:inherit; }
+  </style>
+</head>
+<body class="light">
+  <div class="bg-image"></div>
+  <div class="bg-overlay"></div>
+
+  <div class="app">
+    <div class="header">
+      <div class="back-btn" onclick="history.back()">←</div>
+      <div class="header-title">Настройки</div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="profile-card" onclick="openSub('profile')">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar">S</div>
+        <div class="avatar-edit">✏️</div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">Said</div>
+        <div class="profile-username">@saidspit</div>
+        <div class="profile-bio">Создатель Keyji 🏮</div>
+      </div>
+      <div class="profile-arrow">›</div>
+    </div>
+
+    <!-- APPEARANCE -->
+    <div class="section">
+      <div class="section-title">Внешний вид</div>
+      <div class="section-card">
+        <div class="setting-item" onclick="toggleTheme()">
+          <div class="setting-icon orange">🌙</div>
+          <div class="setting-info">
+            <div class="setting-label">Тёмная тема</div>
+          </div>
+          <div class="setting-right">
+            <div class="toggle-switch" id="darkToggle"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon orange">🔤</div>
+          <div class="setting-info">
+            <div class="setting-label">Размер шрифта</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-value">Средний</div>
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon orange">🖼</div>
+          <div class="setting-info">
+            <div class="setting-label">Фон чата</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="section">
+      <div class="section-title">Уведомления</div>
+      <div class="section-card">
+        <div class="setting-item" onclick="tog('notifToggle')">
+          <div class="setting-icon blue">🔔</div>
+          <div class="setting-info"><div class="setting-label">Уведомления</div></div>
+          <div class="setting-right">
+            <div class="toggle-switch on" id="notifToggle"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="setting-item" onclick="tog('soundToggle')">
+          <div class="setting-icon blue">🔊</div>
+          <div class="setting-info"><div class="setting-label">Звук</div></div>
+          <div class="setting-right">
+            <div class="toggle-switch on" id="soundToggle"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="setting-item" onclick="tog('vibrToggle')">
+          <div class="setting-icon blue">📳</div>
+          <div class="setting-info"><div class="setting-label">Вибрация</div></div>
+          <div class="setting-right">
+            <div class="toggle-switch on" id="vibrToggle"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="setting-item" onclick="tog('prevToggle')">
+          <div class="setting-icon blue">👁</div>
+          <div class="setting-info">
+            <div class="setting-label">Показывать превью</div>
+            <div class="setting-sub">Текст сообщения в уведомлении</div>
+          </div>
+          <div class="setting-right">
+            <div class="toggle-switch on" id="prevToggle"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIVACY -->
+    <div class="section">
+      <div class="section-title">Конфиденциальность</div>
+      <div class="section-card">
+        <div class="setting-item">
+          <div class="setting-icon green">👁</div>
+          <div class="setting-info">
+            <div class="setting-label">Кто видит мой статус</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-value">Все</div>
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon green">📷</div>
+          <div class="setting-info">
+            <div class="setting-label">Кто видит фото</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-value">Все</div>
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+        <div class="setting-item" onclick="tog('emailToggle')">
+          <div class="setting-icon green">📧</div>
+          <div class="setting-info">
+            <div class="setting-label">Скрыть email</div>
+          </div>
+          <div class="setting-right">
+            <div class="toggle-switch" id="emailToggle"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="setting-item" onclick="tog('countryToggle')">
+          <div class="setting-icon green">🌍</div>
+          <div class="setting-info">
+            <div class="setting-label">Скрыть страну</div>
+          </div>
+          <div class="setting-right">
+            <div class="toggle-switch" id="countryToggle"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="setting-item" onclick="tog('onlineToggle')">
+          <div class="setting-icon green">🟢</div>
+          <div class="setting-info">
+            <div class="setting-label">Скрыть время онлайн</div>
+            <div class="setting-sub">Никто не увидит когда вы были в сети</div>
+          </div>
+          <div class="setting-right">
+            <div class="toggle-switch" id="onlineToggle"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon green">📱</div>
+          <div class="setting-info">
+            <div class="setting-label">Номер телефона</div>
+            <div class="setting-sub">Добавить по желанию</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon green">🔐</div>
+          <div class="setting-info">
+            <div class="setting-label">Блокировка приложения</div>
+            <div class="setting-sub">PIN / биометрия</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon green">🛡</div>
+          <div class="setting-info">
+            <div class="setting-label">2-этапная аутентификация</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATA -->
+    <div class="section">
+      <div class="section-title">Данные</div>
+      <div class="section-card">
+        <div class="setting-item">
+          <div class="setting-icon gray">🗂</div>
+          <div class="setting-info">
+            <div class="setting-label">Очистить кэш</div>
+            <div class="setting-sub">24.3 МБ</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon gray">💾</div>
+          <div class="setting-info">
+            <div class="setting-label">Управление хранилищем</div>
+          </div>
+          <div class="setting-right">
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OTHER -->
+    <div class="section">
+      <div class="section-title">Прочее</div>
+      <div class="section-card">
+        <div class="setting-item">
+          <div class="setting-icon purple">🌐</div>
+          <div class="setting-info"><div class="setting-label">Язык</div></div>
+          <div class="setting-right">
+            <div class="setting-value">Русский</div>
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon purple">ℹ️</div>
+          <div class="setting-info"><div class="setting-label">О приложении</div></div>
+          <div class="setting-right">
+            <div class="setting-value">v1.0.0</div>
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-icon purple">✉️</div>
+          <div class="setting-info"><div class="setting-label">Написать в поддержку</div></div>
+          <div class="setting-right">
+            <div class="setting-arrow">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DANGER -->
+    <div class="section">
+      <div class="section-title">Аккаунт</div>
+      <div class="section-card">
+        <div class="setting-item danger">
+          <div class="setting-icon red">🚪</div>
+          <div class="setting-info"><div class="setting-label">Выйти</div></div>
+        </div>
+        <div class="setting-item danger">
+          <div class="setting-icon red">🗑</div>
+          <div class="setting-info">
+            <div class="setting-label">Удалить аккаунт</div>
+            <div class="setting-sub" style="color:#e5393560">Это действие необратимо</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:32px"></div>
+  </div>
+
+  <script>
+    let isDark = false;
+
+    function toggleTheme() {
+      isDark = !isDark;
+      document.body.className = isDark ? 'dark' : 'light';
+      document.getElementById('darkToggle').classList.toggle('on', isDark);
+    }
+
+    function tog(id) {
+      document.getElementById(id).classList.toggle('on');
+    }
+
+    function openSub(page) {
+      // Navigate to profile page
+    }
+  </script>
+</body>
+</html>
+ENDOFFILE
