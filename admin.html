@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Keyji — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    :root { --orange:#FF6B00; --orange-light:#FF8C38; }
+    body { font-family:'Montserrat',sans-serif; min-height:100vh; background:#0a0a0a; overflow-x:hidden; }
+    .bg-image { position:fixed; inset:0; z-index:0; background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg'); background-size:cover; background-position:center; }
+    .bg-overlay { position:fixed; inset:0; z-index:1; background:rgba(0,0,0,0.82); }
+    .app { position:relative; z-index:2; min-height:100vh; padding-bottom:40px; }
+
+    /* LOGIN SCREEN */
+    #loginScreen { position:fixed; inset:0; z-index:50; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px; }
+    .login-logo { font-family:'Noto Serif JP',serif; font-size:48px; font-weight:700; color:white; margin-bottom:8px; }
+    .login-sub { font-size:13px; color:rgba(255,255,255,0.4); letter-spacing:2px; text-transform:uppercase; margin-bottom:48px; }
+    .login-card { width:100%; max-width:320px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(20px); border-radius:24px; padding:28px 24px; }
+    .login-title { font-family:'Noto Serif JP',serif; font-size:20px; font-weight:700; color:white; margin-bottom:6px; text-align:center; }
+    .login-desc { font-size:12px; color:rgba(255,255,255,0.4); text-align:center; margin-bottom:24px; }
+    .login-input { width:100%; padding:14px 16px; border-radius:14px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.07); color:white; font-family:'Montserrat',sans-serif; font-size:16px; outline:none; text-align:center; letter-spacing:4px; margin-bottom:14px; transition:border-color 0.2s; }
+    .login-input:focus { border-color:var(--orange); }
+    .login-input.error { border-color:#e53935; animation:shake 0.4s ease; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+    .login-btn { width:100%; padding:15px; border-radius:14px; border:none; background:var(--orange); color:white; font-family:'Montserrat',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 20px rgba(255,107,0,0.3); }
+    .login-btn:active { transform:scale(0.97); background:var(--orange-light); }
+
+    /* HEADER */
+    .header { display:flex; align-items:center; justify-content:space-between; padding:52px 16px 16px; background:rgba(0,0,0,0.6); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.08); position:sticky; top:0; z-index:10; }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .back-btn { width:38px; height:38px; border-radius:12px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; color:white; transition:all 0.2s; }
+    .back-btn:active { transform:scale(0.92); }
+    .header-title { font-family:'Noto Serif JP',serif; font-size:20px; font-weight:700; color:white; }
+    .admin-badge { padding:4px 12px; border-radius:20px; background:rgba(255,107,0,0.2); border:1px solid rgba(255,107,0,0.3); color:var(--orange); font-size:11px; font-weight:700; letter-spacing:1px; }
+
+    /* STATS */
+    .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:16px; }
+    .stat-card { padding:18px 16px; border-radius:18px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); backdrop-filter:blur(12px); }
+    .stat-icon { font-size:24px; margin-bottom:8px; }
+    .stat-num { font-size:28px; font-weight:700; color:white; margin-bottom:4px; }
+    .stat-num.orange { color:var(--orange); }
+    .stat-label { font-size:12px; color:rgba(255,255,255,0.4); font-weight:500; }
+
+    /* SECTION */
+    .section { padding:0 16px; margin-bottom:8px; }
+    .section-title { font-size:11px; font-weight:700; color:var(--orange); letter-spacing:1.5px; text-transform:uppercase; padding:16px 0 10px; }
+    .section-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); backdrop-filter:blur(12px); border-radius:18px; overflow:hidden; }
+
+    .admin-item { display:flex; align-items:center; gap:14px; padding:14px 16px; cursor:pointer; transition:background 0.15s; position:relative; }
+    .admin-item:not(:last-child)::after { content:''; position:absolute; bottom:0; left:54px; right:0; height:1px; background:rgba(255,255,255,0.06); }
+    .admin-item:active { background:rgba(255,107,0,0.08); }
+    .admin-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .admin-icon.orange { background:rgba(255,107,0,0.2); }
+    .admin-icon.red { background:rgba(229,57,53,0.2); }
+    .admin-icon.green { background:rgba(52,168,83,0.2); }
+    .admin-icon.blue { background:rgba(66,133,244,0.2); }
+    .admin-icon.purple { background:rgba(156,39,176,0.2); }
+    .admin-info { flex:1; }
+    .admin-label { font-size:14px; font-weight:600; color:rgba(255,255,255,0.9); }
+    .admin-sub { font-size:12px; color:rgba(255,255,255,0.35); margin-top:2px; }
+    .admin-arrow { color:rgba(255,255,255,0.2); font-size:14px; }
+
+    /* TOGGLE */
+    .toggle-switch { width:44px; height:24px; border-radius:12px; background:#333; position:relative; transition:background 0.3s; cursor:pointer; flex-shrink:0; }
+    .toggle-switch.on { background:var(--orange); }
+    .toggle-knob { position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:9px; background:white; transition:left 0.3s ease; box-shadow:0 1px 4px rgba(0,0,0,0.3); }
+    .toggle-switch.on .toggle-knob { left:23px; }
+
+    /* USER SEARCH */
+    .search-box { display:flex; align-items:center; gap:10px; padding:12px 16px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:14px; margin:0 16px 8px; }
+    .search-box input { flex:1; border:none; background:transparent; font-family:'Montserrat',sans-serif; font-size:14px; color:white; outline:none; }
+    .search-box input::placeholder { color:rgba(255,255,255,0.3); }
+
+    /* USER ROW */
+    .user-row { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; transition:background 0.15s; position:relative; }
+    .user-row:not(:last-child)::after { content:''; position:absolute; bottom:0; left:60px; right:0; height:1px; background:rgba(255,255,255,0.06); }
+    .user-row:active { background:rgba(255,255,255,0.05); }
+    .user-av { width:40px; height:40px; border-radius:13px; background:linear-gradient(135deg,var(--orange),#ff3d00); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:white; flex-shrink:0; }
+    .user-info { flex:1; }
+    .user-name { font-size:14px; font-weight:700; color:white; margin-bottom:2px; }
+    .user-id { font-size:11px; color:rgba(255,255,255,0.35); }
+    .user-actions { display:flex; gap:6px; }
+    .ua-btn { padding:6px 12px; border-radius:10px; border:none; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+    .ua-btn.freeze { background:rgba(66,133,244,0.2); color:#74b9ff; }
+    .ua-btn.freeze:active { background:rgba(66,133,244,0.4); }
+    .ua-btn.verify { background:rgba(255,107,0,0.2); color:var(--orange); }
+    .ua-btn.verify:active { background:rgba(255,107,0,0.4); }
+    .ua-btn.ban { background:rgba(229,57,53,0.2); color:#ef9a9a; }
+    .ua-btn.ban:active { background:rgba(229,57,53,0.4); }
+    .frozen-tag { font-size:10px; color:#74b9ff; font-weight:600; background:rgba(66,133,244,0.15); padding:2px 8px; border-radius:8px; }
+
+    /* MODAL */
+    .modal-overlay { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); display:none; align-items:flex-end; }
+    .modal-overlay.show { display:flex; }
+    .modal { width:100%; background:rgba(18,18,18,0.98); border:1px solid rgba(255,255,255,0.1); border-radius:24px 24px 0 0; padding:24px 20px 44px; animation:slideUp 0.35s ease; }
+    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+    .modal-handle { width:36px; height:4px; border-radius:2px; background:#333; margin:0 auto 20px; }
+    .modal-title { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:700; color:white; margin-bottom:20px; }
+    .modal-input { width:100%; padding:14px 16px; border-radius:14px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.07); font-family:'Montserrat',sans-serif; font-size:14px; color:white; outline:none; }
+    .modal-input:focus { border-color:var(--orange); }
+    .modal-save { width:100%; padding:15px; border-radius:14px; border:none; background:var(--orange); color:white; font-family:'Montserrat',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-top:4px; transition:all 0.2s; }
+    .modal-save:active { background:var(--orange-light); transform:scale(0.98); }
+    .modal-cancel { width:100%; padding:13px; border-radius:14px; border:1px solid rgba(255,255,255,0.12); background:transparent; color:rgba(255,255,255,0.5); font-family:'Montserrat',sans-serif; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <div class="bg-image"></div>
+  <div class="bg-overlay"></div>
+
+  <!-- LOGIN -->
+  <div id="loginScreen">
+    <div class="login-logo">⛩</div>
+    <div class="login-sub">Keyji Admin Panel</div>
+    <div class="login-card">
+      <div class="login-title">Доступ закрыт</div>
+      <div class="login-desc">Введите пароль администратора</div>
+      <input class="login-input" type="password" id="adminPass" placeholder="••••••••" maxlength="20">
+      <button class="login-btn" onclick="checkPass()">Войти</button>
+    </div>
+  </div>
+
+  <!-- ADMIN APP -->
+  <div class="app" id="adminApp" style="display:none">
+    <div class="header">
+      <div class="header-left">
+        <div class="back-btn" onclick="location.href='settings.html'">←</div>
+        <div class="header-title">Admin Panel</div>
+      </div>
+      <div class="admin-badge">CREATOR</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👤</div>
+        <div class="stat-num orange" id="totalUsers">1</div>
+        <div class="stat-label">Пользователей</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-num">0</div>
+        <div class="stat-label">Сообщений сегодня</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🟢</div>
+        <div class="stat-num">1</div>
+        <div class="stat-label">Онлайн сейчас</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🚫</div>
+        <div class="stat-num" id="frozenCount">0</div>
+        <div class="stat-label">Заморожено</div>
+      </div>
+    </div>
+
+    <!-- BROADCAST -->
+    <div class="section">
+      <div class="section-title">Рассылка</div>
+      <div class="section-card">
+        <div class="admin-item" onclick="openBroadcast()">
+          <div class="admin-icon orange">📣</div>
+          <div class="admin-info">
+            <div class="admin-label">Отправить новость</div>
+            <div class="admin-sub">Всем пользователям через @keyjicreatorbot</div>
+          </div>
+          <div class="admin-arrow">›</div>
+        </div>
+        <div class="admin-item" onclick="tog('ideaToggle')">
+          <div class="admin-icon orange">💡</div>
+          <div class="admin-info">
+            <div class="admin-label">Кнопка "Предложить идею"</div>
+            <div class="admin-sub">Показывать пользователям</div>
+          </div>
+          <div class="toggle-switch" id="ideaToggle"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="section">
+      <div class="section-title">Пользователи</div>
+      <div class="search-box">
+        <span style="color:rgba(255,255,255,0.3)">🔍</span>
+        <input type="text" placeholder="Поиск по имени или @username" oninput="filterUsers(this.value)">
+      </div>
+      <div class="section-card" id="usersList">
+        <div class="user-row" data-name="said">
+          <div class="user-av">S</div>
+          <div class="user-info">
+            <div class="user-name">Said <span style="font-size:11px;color:var(--orange)">● Создатель</span></div>
+            <div class="user-id">@saidspit · ID: 10482</div>
+          </div>
+          <div class="user-actions">
+            <button class="ua-btn verify" onclick="giveVerify(this)">✓ Верификация</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="section">
+      <div class="section-title">Безопасность</div>
+      <div class="section-card">
+        <div class="admin-item">
+          <div class="admin-icon red">🔐</div>
+          <div class="admin-info">
+            <div class="admin-label">Сменить пароль</div>
+          </div>
+          <div class="admin-arrow">›</div>
+        </div>
+        <div class="admin-item" onclick="tog('maintenanceToggle')">
+          <div class="admin-icon red">🛠</div>
+          <div class="admin-info">
+            <div class="admin-label">Режим обслуживания</div>
+            <div class="admin-sub">Заблокировать доступ для всех</div>
+          </div>
+          <div class="toggle-switch" id="maintenanceToggle"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="admin-item">
+          <div class="admin-icon blue">📊</div>
+          <div class="admin-info">
+            <div class="admin-label">Логи активности</div>
+          </div>
+          <div class="admin-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HACK ALERTS -->
+    <div class="section">
+      <div class="section-title">Попытки взлома</div>
+      <div class="section-card">
+        <div style="padding:24px; text-align:center;">
+          <div style="font-size:32px;margin-bottom:8px">🛡</div>
+          <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.6)">Подозрительных попыток не обнаружено</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:40px"></div>
+  </div>
+
+  <!-- BROADCAST MODAL -->
+  <div class="modal-overlay" id="broadcastModal" onclick="closeBM(event)">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">📣 Отправить новость</div>
+      <input class="modal-input" type="text" placeholder="Заголовок новости">
+      <textarea class="modal-input" rows="4" placeholder="Текст сообщения..."></textarea>
+      <button class="modal-save" onclick="sendBroadcast()">Отправить всем</button>
+      <button class="modal-cancel" onclick="closeBM2()">Отмена</button>
+    </div>
+  </div>
+
+  <script>
+    // Password check — replace 'keyji2026' with real password stored in Firebase
+    const ADMIN_PASSWORD = 'keyji2026';
+
+    function checkPass() {
+      const val = document.getElementById('adminPass').value;
+      if (val === ADMIN_PASSWORD) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminApp').style.display = 'block';
+      } else {
+        const inp = document.getElementById('adminPass');
+        inp.classList.add('error');
+        inp.value = '';
+        inp.placeholder = 'Неверный пароль';
+        setTimeout(() => { inp.classList.remove('error'); inp.placeholder = '••••••••'; }, 1500);
+      }
+    }
+
+    document.getElementById('adminPass').addEventListener('keydown', e => {
+      if (e.key === 'Enter') checkPass();
+    });
+
+    function tog(id) { document.getElementById(id).classList.toggle('on'); }
+
+    function filterUsers(q) {
+      document.querySelectorAll('.user-row').forEach(r => {
+        r.style.display = r.dataset.name.includes(q.toLowerCase()) ? 'flex' : 'none';
+      });
+    }
+
+    function giveVerify(btn) {
+      btn.textContent = '✓ Выдано';
+      btn.style.background = 'rgba(52,168,83,0.2)';
+      btn.style.color = '#81c784';
+      btn.disabled = true;
+    }
+
+    function openBroadcast() { document.getElementById('broadcastModal').classList.add('show'); }
+    function closeBM(e) { if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('show'); }
+    function closeBM2() { document.getElementById('broadcastModal').classList.remove('show'); }
+    function sendBroadcast() { closeBM2(); alert('✅ Новость отправлена всем пользователям!'); }
+  </script>
+</body>
+</html>
