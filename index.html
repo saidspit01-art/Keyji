@@ -3,532 +3,177 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-
   <title>Keyji</title>
-
-  <!-- PWA -->
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#FF6B00" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Keyji" />
-
-  <!-- ICON -->
-  <link rel="icon" type="image/jpeg" href="https://i.ibb.co/GQ3T21qm/file-00000000ea2472469cbca4c0cbe8b34e.jpg" />
-  <link rel="apple-touch-icon" href="https://i.ibb.co/GQ3T21qm/file-00000000ea2472469cbca4c0cbe8b34e.jpg" />
-
-  <!-- Fonts -->
+  <link rel="icon" type="image/png" href="https://KeyjiCompany.github.io/keyji/logo.png" />
+  <link rel="apple-touch-icon" href="https://KeyjiCompany.github.io/keyji/logo.png" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
+    *{ margin:0; padding:0; box-sizing:border-box; }
+    :root{ --orange:#FF6B00; --orange-light:#ff8c38; --glass:rgba(255,255,255,0.08); --glass-border:rgba(255,255,255,0.15); }
+    body{ font-family:'Montserrat',sans-serif; background:#0a0a0a; min-height:100vh; overflow:hidden; }
 
-    :root{
-      --orange:#FF6B00;
-      --orange-light:#ff8c38;
-      --white:#ffffff;
-      --glass:rgba(255,255,255,0.08);
-      --glass-border:rgba(255,255,255,0.15);
-    }
+    #splash{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#0a0a0a; z-index:999; transition:0.8s; }
+    #splash.hide{ opacity:0; transform:scale(1.05); pointer-events:none; }
+    .splash-logo{ width:120px; height:120px; border-radius:28px; object-fit:cover; animation:pulse 1.6s infinite alternate; }
+    @keyframes pulse{ from{ transform:scale(0.95); opacity:0.8; } to{ transform:scale(1.05); opacity:1; } }
 
-    body{
-      font-family:'Montserrat',sans-serif;
-      background:#0a0a0a;
-      min-height:100vh;
-      overflow:hidden;
-    }
+    #login-screen{ position:fixed; inset:0; opacity:0; transition:1s; }
+    #login-screen.show{ opacity:1; }
+    .bg{ position:absolute; inset:0; background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg'); background-size:cover; background-position:center; }
+    .overlay{ position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.15), rgba(0,0,0,0.75), rgba(0,0,0,0.95)); }
+    .content{ position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:space-between; padding:60px 28px 50px; }
+    .top{ display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; }
+    .logo{ width:95px; height:95px; border-radius:24px; object-fit:cover; margin-bottom:18px; }
+    .title{ font-family:'Noto Serif JP',serif; color:white; font-size:38px; font-weight:700; letter-spacing:4px; }
+    .subtitle{ color:rgba(255,255,255,0.55); font-size:12px; letter-spacing:3px; margin-top:10px; }
+    .bottom{ width:100%; }
+    .btn{ width:100%; border:none; border-radius:18px; padding:17px; cursor:pointer; font-size:15px; font-weight:700; margin-bottom:14px; transition:0.25s; font-family:'Montserrat',sans-serif; }
+    .btn:active{ transform:scale(0.98); }
+    .btn-primary{ background:var(--orange); color:white; }
+    .btn-primary:hover{ background:var(--orange-light); }
+    .btn-secondary{ background:var(--glass); color:white; border:1px solid var(--glass-border); backdrop-filter:blur(20px); }
+    .divider{ text-align:center; color:rgba(255,255,255,0.35); margin-bottom:14px; font-size:12px; }
 
-    /* SPLASH */
+    #auth{ position:fixed; inset:0; display:none; z-index:1000; overflow-y:auto; }
+    #auth.show{ display:block; }
+    .auth-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); }
+    .auth-content{ position:relative; z-index:2; padding:55px 28px 40px; min-height:100%; }
+    .back{ width:42px; height:42px; border-radius:14px; border:1px solid var(--glass-border); background:var(--glass); color:white; font-size:20px; cursor:pointer; margin-bottom:30px; display:flex; align-items:center; justify-content:center; }
+    .auth-title{ color:white; font-size:30px; font-weight:700; margin-bottom:26px; font-family:'Noto Serif JP',serif; }
+    .tabs{ display:flex; gap:10px; margin-bottom:28px; }
+    .tab{ flex:1; padding:14px; border-radius:14px; border:1px solid var(--glass-border); cursor:pointer; font-weight:700; background:var(--glass); color:rgba(255,255,255,0.5); font-family:'Montserrat',sans-serif; font-size:14px; transition:0.2s; }
+    .tab.active{ background:var(--orange); color:white; border-color:var(--orange); }
+    .field{ margin-bottom:16px; }
+    .label{ display:block; color:rgba(255,255,255,0.55); font-size:11px; margin-bottom:8px; letter-spacing:1.5px; text-transform:uppercase; }
+    .input{ width:100%; padding:16px; border-radius:16px; border:1px solid var(--glass-border); background:var(--glass); color:white; outline:none; font-size:15px; backdrop-filter:blur(20px); font-family:'Montserrat',sans-serif; transition:border-color 0.2s; }
+    .input::placeholder{ color:rgba(255,255,255,0.25); }
+    .input:focus{ border-color:var(--orange); }
+    .submit{ width:100%; padding:17px; border:none; border-radius:18px; background:var(--orange); color:white; font-size:15px; font-weight:700; margin-top:10px; cursor:pointer; font-family:'Montserrat',sans-serif; transition:0.2s; }
+    .submit:active{ transform:scale(0.98); background:var(--orange-light); }
+    .terms{ margin-top:18px; text-align:center; color:rgba(255,255,255,0.35); font-size:11px; line-height:1.6; }
+    .terms span{ color:var(--orange); cursor:pointer; }
+    #register-fields{ display:none; }
+    #register-fields.show{ display:block; }
 
-    #splash{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#0a0a0a;
-      z-index:999;
-      transition:0.8s;
-    }
-
-    #splash.hide{
-      opacity:0;
-      transform:scale(1.05);
-      pointer-events:none;
-    }
-
-    .splash-logo{
-      width:120px;
-      height:120px;
-      border-radius:28px;
-      object-fit:cover;
-      animation:pulse 1.6s infinite alternate;
-    }
-
-    @keyframes pulse{
-      from{
-        transform:scale(0.95);
-        opacity:0.8;
-      }
-      to{
-        transform:scale(1.05);
-        opacity:1;
-      }
-    }
-
-    /* LOGIN */
-
-    #login-screen{
-      position:fixed;
-      inset:0;
-      opacity:0;
-      transition:1s;
-    }
-
-    #login-screen.show{
-      opacity:1;
-    }
-
-    .bg{
-      position:absolute;
-      inset:0;
-      background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg');
-      background-size:cover;
-      background-position:center;
-    }
-
-    .overlay{
-      position:absolute;
-      inset:0;
-      background:
-      linear-gradient(
-        to bottom,
-        rgba(0,0,0,0.2),
-        rgba(0,0,0,0.15),
-        rgba(0,0,0,0.75),
-        rgba(0,0,0,0.95)
-      );
-    }
-
-    .content{
-      position:relative;
-      z-index:2;
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      padding:60px 28px 50px;
-    }
-
-    .top{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      flex:1;
-    }
-
-    .logo{
-      width:95px;
-      height:95px;
-      border-radius:24px;
-      object-fit:cover;
-      margin-bottom:18px;
-    }
-
-    .title{
-      font-family:'Noto Serif JP',serif;
-      color:white;
-      font-size:38px;
-      font-weight:700;
-      letter-spacing:4px;
-    }
-
-    .subtitle{
-      color:rgba(255,255,255,0.55);
-      font-size:12px;
-      letter-spacing:3px;
-      margin-top:10px;
-    }
-
-    .bottom{
-      width:100%;
-    }
-
-    .btn{
-      width:100%;
-      border:none;
-      border-radius:18px;
-      padding:17px;
-      cursor:pointer;
-      font-size:15px;
-      font-weight:700;
-      margin-bottom:14px;
-      transition:0.25s;
-    }
-
-    .btn:active{
-      transform:scale(0.98);
-    }
-
-    .btn-primary{
-      background:var(--orange);
-      color:white;
-    }
-
-    .btn-primary:hover{
-      background:var(--orange-light);
-    }
-
-    .btn-secondary{
-      background:var(--glass);
-      color:white;
-      border:1px solid var(--glass-border);
-      backdrop-filter:blur(20px);
-    }
-
-    .divider{
-      text-align:center;
-      color:rgba(255,255,255,0.35);
-      margin-bottom:14px;
-      font-size:12px;
-    }
-
-    /* AUTH */
-
-    #auth{
-      position:fixed;
-      inset:0;
-      display:none;
-      z-index:1000;
-    }
-
-    #auth.show{
-      display:block;
-    }
-
-    .auth-overlay{
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,0.88);
-      backdrop-filter:blur(8px);
-    }
-
-    .auth-content{
-      position:relative;
-      z-index:2;
-      padding:55px 28px;
-      height:100%;
-    }
-
-    .back{
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      border:1px solid var(--glass-border);
-      background:var(--glass);
-      color:white;
-      font-size:20px;
-      cursor:pointer;
-      margin-bottom:30px;
-    }
-
-    .auth-title{
-      color:white;
-      font-size:30px;
-      font-weight:700;
-      margin-bottom:26px;
-      font-family:'Noto Serif JP',serif;
-    }
-
-    .tabs{
-      display:flex;
-      gap:10px;
-      margin-bottom:28px;
-    }
-
-    .tab{
-      flex:1;
-      padding:14px;
-      border-radius:14px;
-      border:none;
-      cursor:pointer;
-      font-weight:700;
-      background:var(--glass);
-      color:rgba(255,255,255,0.5);
-      border:1px solid var(--glass-border);
-    }
-
-    .tab.active{
-      background:var(--orange);
-      color:white;
-    }
-
-    .field{
-      margin-bottom:16px;
-    }
-
-    .label{
-      display:block;
-      color:rgba(255,255,255,0.55);
-      font-size:11px;
-      margin-bottom:8px;
-      letter-spacing:1.5px;
-      text-transform:uppercase;
-    }
-
-    .input{
-      width:100%;
-      padding:16px;
-      border-radius:16px;
-      border:1px solid var(--glass-border);
-      background:var(--glass);
-      color:white;
-      outline:none;
-      font-size:15px;
-      backdrop-filter:blur(20px);
-    }
-
-    .input::placeholder{
-      color:rgba(255,255,255,0.25);
-    }
-
-    .submit{
-      width:100%;
-      padding:17px;
-      border:none;
-      border-radius:18px;
-      background:var(--orange);
-      color:white;
-      font-size:15px;
-      font-weight:700;
-      margin-top:10px;
-      cursor:pointer;
-    }
-
-    .submit:active{
-      transform:scale(0.98);
-    }
-
-    .terms{
-      margin-top:18px;
-      text-align:center;
-      color:rgba(255,255,255,0.35);
-      font-size:11px;
-      line-height:1.6;
-    }
-
-    .terms span{
-      color:var(--orange);
-    }
-
-    #register-fields{
-      display:none;
-    }
-
-    #register-fields.show{
-      display:block;
-    }
+    /* Google btn */
+    .google-btn{ width:100%; padding:14px; border-radius:16px; border:1px solid var(--glass-border); background:var(--glass); backdrop-filter:blur(10px); color:white; font-family:'Montserrat',sans-serif; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px; transition:0.2s; }
+    .google-btn:active{ background:rgba(255,255,255,0.15); transform:scale(0.97); }
+    .or-divider{ display:flex; align-items:center; gap:12px; margin:14px 0 4px; }
+    .or-line{ flex:1; height:1px; background:var(--glass-border); }
+    .or-text{ font-size:12px; color:rgba(255,255,255,0.3); font-weight:600; }
   </style>
 </head>
 <body>
 
-  <!-- SPLASH -->
-
   <div id="splash">
-    <img
-      class="splash-logo"
-      src="https://i.ibb.co/GQ3T21qm/file-00000000ea2472469cbca4c0cbe8b34e.jpg"
-      alt="Keyji"
-    >
+    <img class="splash-logo" src="https://KeyjiCompany.github.io/keyji/logo.png" alt="Keyji">
   </div>
 
-  <!-- LOGIN -->
-
   <div id="login-screen">
-
     <div class="bg"></div>
     <div class="overlay"></div>
-
     <div class="content">
-
       <div class="top">
-        <img
-          class="logo"
-          src="https://i.ibb.co/GQ3T21qm/file-00000000ea2472469cbca4c0cbe8b34e.jpg"
-          alt="Keyji"
-        >
-
+        <img class="logo" src="https://KeyjiCompany.github.io/keyji/logo.png" alt="Keyji">
         <div class="title">Keyji</div>
         <div class="subtitle">MESSENGER</div>
       </div>
-
       <div class="bottom">
-        <button class="btn btn-primary" onclick="openAuth('ru')">
-          Продолжить на русском
-        </button>
-
+        <button class="btn btn-primary" onclick="openAuth('ru')">Продолжить на русском</button>
         <div class="divider">или</div>
-
-        <button class="btn btn-secondary" onclick="openAuth('en')">
-          Continue in English
-        </button>
+        <button class="btn btn-secondary" onclick="openAuth('en')">Continue in English</button>
       </div>
-
     </div>
   </div>
 
-  <!-- AUTH -->
-
   <div id="auth">
-
     <div class="auth-overlay"></div>
-
     <div class="auth-content">
-
       <button class="back" onclick="closeAuth()">←</button>
-
-      <div class="auth-title" id="auth-title">
-        Войти
-      </div>
-
+      <div class="auth-title" id="auth-title">Войти</div>
       <div class="tabs">
-        <button class="tab active" id="login-tab" onclick="switchTab('login')">
-          Войти
-        </button>
-
-        <button class="tab" id="register-tab" onclick="switchTab('register')">
-          Регистрация
-        </button>
+        <button class="tab active" id="login-tab" onclick="switchTab('login')">Войти</button>
+        <button class="tab" id="register-tab" onclick="switchTab('register')">Регистрация</button>
       </div>
-
       <div id="register-fields">
-
         <div class="field">
           <label class="label">Имя</label>
           <input class="input" type="text" placeholder="Ваше имя">
         </div>
-
         <div class="field">
           <label class="label">Юзернейм</label>
           <input class="input" type="text" placeholder="@username">
         </div>
-
       </div>
-
       <div class="field">
         <label class="label">Email</label>
         <input class="input" type="email" placeholder="example@email.com">
       </div>
-
       <div class="field">
         <label class="label">Пароль</label>
         <input class="input" type="password" placeholder="••••••••">
       </div>
-
-      <button class="submit" id="submit-btn">
-        Войти
-      </button>
-
-      <div class="terms">
-        Продолжая, вы соглашаетесь с
-        <span>Условиями использования</span>
-        <br>
-        и
-        <span>Политикой конфиденциальности</span>
+      <button class="submit" id="submit-btn">Войти</button>
+      <div class="or-divider">
+        <div class="or-line"></div>
+        <div class="or-text">ИЛИ</div>
+        <div class="or-line"></div>
       </div>
-
+      <button class="google-btn">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Google
+      </button>
+      <div class="terms">
+        Продолжая, вы соглашаетесь с <span>Условиями использования</span><br>и <span>Политикой конфиденциальности</span>
+      </div>
     </div>
   </div>
 
   <script>
-    // Splash
-
     window.addEventListener('load', () => {
-
       setTimeout(() => {
-
-        document.getElementById('splash')
-          .classList.add('hide');
-
-        setTimeout(() => {
-
-          document.getElementById('login-screen')
-            .classList.add('show');
-
-        }, 400);
-
+        document.getElementById('splash').classList.add('hide');
+        setTimeout(() => document.getElementById('login-screen').classList.add('show'), 400);
       }, 1800);
-
     });
 
-    // AUTH
-
-    function openAuth(lang){
-
-      document
-        .getElementById('auth')
-        .classList.add('show');
-
+    function openAuth(lang) {
+      localStorage.setItem('keyji_lang', lang);
+      document.getElementById('auth').classList.add('show');
       switchTab('login');
     }
 
-    function closeAuth(){
-
-      document
-        .getElementById('auth')
-        .classList.remove('show');
+    function closeAuth() {
+      document.getElementById('auth').classList.remove('show');
     }
 
-    function switchTab(tab){
-
-      const login =
-        tab === 'login';
-
-      document
-        .getElementById('login-tab')
-        .classList.toggle('active', login);
-
-      document
-        .getElementById('register-tab')
-        .classList.toggle('active', !login);
-
-      document
-        .getElementById('register-fields')
-        .classList.toggle('show', !login);
-
-      document
-        .getElementById('auth-title')
-        .textContent = login
-        ? 'Войти'
-        : 'Регистрация';
-
-      document
-        .getElementById('submit-btn')
-        .textContent = login
-        ? 'Войти'
-        : 'Создать аккаунт';
+    function switchTab(tab) {
+      const login = tab === 'login';
+      document.getElementById('login-tab').classList.toggle('active', login);
+      document.getElementById('register-tab').classList.toggle('active', !login);
+      document.getElementById('register-fields').classList.toggle('show', !login);
+      document.getElementById('auth-title').textContent = login ? 'Войти' : 'Регистрация';
+      document.getElementById('submit-btn').textContent = login ? 'Войти' : 'Создать аккаунт';
     }
-
-    // SERVICE WORKER
 
     if ('serviceWorker' in navigator) {
-
       window.addEventListener('load', () => {
-
-        navigator.serviceWorker
-          .register('./sw.js')
-          .then(() => console.log('SW registered'));
-
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('[Keyji] SW registered'))
+          .catch(e => console.log('[Keyji] SW error', e));
       });
-
     }
   </script>
-
 </body>
 </html>
