@@ -1,248 +1,149 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
   <title>Keyji — Боты</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    :root { --orange:#FF6B00; --orange-light:#FF8C38; --nav-height:72px; }
-    body { font-family:'Montserrat',sans-serif; min-height:100vh; overflow:hidden; background:#f5f0eb; }
-    body.dark { background:#0a0a0a; }
-    .bg-image { position:fixed; inset:0; z-index:0; background-size:cover; background-position:center; }
-    body.light .bg-image { background-image:url('https://i.ibb.co/zTS53bWc/file-000000004b807246a5c9c164255caecf.jpg'); }
-    body.dark .bg-image { background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg'); }
-    body.light .bg-overlay { background:rgba(255,255,255,0.2); }
-    body.dark .bg-overlay { background:rgba(0,0,0,0.4); }
-    .bg-overlay { position:fixed; inset:0; z-index:1; }
-    .app { position:fixed; inset:0; z-index:2; display:flex; flex-direction:column; }
-
-    .header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:52px 16px 14px;
-      background:rgba(255,255,255,0.45); backdrop-filter:blur(20px);
-      border-bottom:1px solid rgba(255,255,255,0.6);
-    }
-    body.dark .header { background:rgba(0,0,0,0.5); border-bottom-color:rgba(255,255,255,0.08); }
-    .header-title { font-family:'Noto Serif JP',serif; font-size:22px; font-weight:700; color:#1a1a1a; }
-    body.dark .header-title { color:white; }
-    .new-btn {
-      padding:8px 16px; border-radius:12px; border:none;
-      background:var(--orange); color:white;
-      font-family:'Montserrat',sans-serif; font-size:13px; font-weight:700;
-      cursor:pointer; transition:all 0.2s;
-      box-shadow:0 4px 12px rgba(255,107,0,0.3);
-    }
-    .new-btn:active { transform:scale(0.95); background:var(--orange-light); }
-
-    /* TABS */
-    .tabs {
-      display:flex; gap:0; padding:12px 16px;
-      background:rgba(255,255,255,0.3); backdrop-filter:blur(10px);
-    }
-    body.dark .tabs { background:rgba(0,0,0,0.3); }
-    .tab {
-      flex:1; padding:10px; text-align:center;
-      font-size:13px; font-weight:600; color:#999;
-      cursor:pointer; border-radius:12px; transition:all 0.2s;
-    }
-    .tab.active { background:var(--orange); color:white; box-shadow:0 4px 12px rgba(255,107,0,0.3); }
-
-    .content { flex:1; overflow-y:auto; padding:8px 0 calc(var(--nav-height)+16px); }
-    .content::-webkit-scrollbar { display:none; }
-
-    /* BOT CARD */
-    .bot-card {
-      margin:4px 12px; padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.7);
-      backdrop-filter:blur(12px); cursor:pointer; transition:all 0.2s;
-      display:flex; align-items:center; gap:14px;
-    }
-    body.dark .bot-card { background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.1); }
-    .bot-card:active { transform:scale(0.98); }
-
-    .bot-avatar {
-      width:54px; height:54px; border-radius:16px;
-      display:flex; align-items:center; justify-content:center;
-      font-size:24px; flex-shrink:0; border:2px solid rgba(255,255,255,0.4);
-    }
-    .bot-info { flex:1; min-width:0; }
-    .bot-name {
-      font-size:15px; font-weight:700; color:#1a1a1a;
-      display:flex; align-items:center; gap:6px; margin-bottom:3px;
-    }
-    body.dark .bot-name { color:white; }
-    .bot-username { font-size:12px; color:var(--orange); font-weight:600; margin-bottom:3px; }
-    .bot-desc { font-size:12px; color:#999; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    body.dark .bot-desc { color:rgba(255,255,255,0.4); }
-    .bot-badge {
-      padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;
-      background:rgba(255,107,0,0.12); color:var(--orange); flex-shrink:0;
-    }
-    .verified-small {
-      width:16px; height:16px; border-radius:50%; background:white;
-      display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
-    }
-    .verified-small svg { width:10px; height:10px; }
-
-    /* EMPTY */
-    .empty-state {
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:60px 32px; text-align:center;
-    }
-    .empty-emoji { font-size:64px; margin-bottom:16px; opacity:0.7; }
-    .empty-title { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:700; color:#1a1a1a; margin-bottom:8px; }
-    body.dark .empty-title { color:white; }
-    .empty-sub { font-size:13px; color:#999; line-height:1.6; }
-
-    /* CREATE MODAL */
-    .modal-overlay {
-      position:fixed; inset:0; z-index:100;
-      background:rgba(0,0,0,0.5); backdrop-filter:blur(8px);
-      display:none; align-items:flex-end;
-    }
-    .modal-overlay.show { display:flex; }
-    .modal {
-      width:100%; background:rgba(255,255,255,0.97);
-      backdrop-filter:blur(30px); border-radius:24px 24px 0 0;
-      padding:24px 20px 44px; animation:slideUp 0.35s ease;
-    }
-    body.dark .modal { background:rgba(18,18,18,0.98); }
-    @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
-    .modal-handle { width:36px; height:4px; border-radius:2px; background:#ddd; margin:0 auto 20px; }
-    body.dark .modal-handle { background:#444; }
-    .modal-title { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:700; color:#1a1a1a; margin-bottom:20px; }
-    body.dark .modal-title { color:white; }
-    .modal-input {
-      width:100%; padding:14px 16px; border-radius:14px; margin-bottom:12px;
-      border:1px solid rgba(0,0,0,0.1); background:rgba(255,255,255,0.8);
-      font-family:'Montserrat',sans-serif; font-size:14px; color:#1a1a1a; outline:none;
-    }
-    body.dark .modal-input { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.12); color:white; }
-    .modal-input:focus { border-color:var(--orange); }
-    .modal-save {
-      width:100%; padding:15px; border-radius:14px; border:none;
-      background:var(--orange); color:white; font-family:'Montserrat',sans-serif;
-      font-size:15px; font-weight:700; cursor:pointer; margin-top:4px; transition:all 0.2s;
-    }
-    .modal-save:active { background:var(--orange-light); transform:scale(0.98); }
-
-    /* BOTTOM NAV */
-    .bottom-nav {
-      position:fixed; bottom:0; left:0; right:0; height:var(--nav-height);
-      display:flex; align-items:center; justify-content:space-around;
-      background:rgba(255,255,255,0.6); border-top:1px solid rgba(255,255,255,0.7);
-      backdrop-filter:blur(20px); z-index:10; padding-bottom:8px;
-    }
-    body.dark .bottom-nav { background:rgba(10,10,10,0.75); border-top-color:rgba(255,255,255,0.1); }
-    .nav-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:6px 16px; border-radius:14px; transition:all 0.2s; flex:1; }
-    .nav-item:active { transform:scale(0.92); }
-    .nav-icon { font-size:22px; transition:transform 0.2s; }
-    .nav-label { font-size:10px; font-weight:600; color:#aaa; letter-spacing:0.5px; transition:color 0.2s; }
-    .nav-item.active .nav-label { color:var(--orange); }
-    .nav-item.active .nav-icon { transform:scale(1.15); }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{--orange:#FF6B00;--nav:72px}
+    body{font-family:'Montserrat',sans-serif;overflow:hidden;height:100vh;background:#f5f0eb}
+    body.dark{background:#0a0a0a}
+    .bg{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center}
+    body.light .bg{background-image:url('https://i.ibb.co/zTS53bWc/file-000000004b807246a5c9c164255caecf.jpg')}
+    body.dark .bg{background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg')}
+    body.light .bgo{background:rgba(255,255,255,.2)}
+    body.dark .bgo{background:rgba(0,0,0,.4)}
+    .bgo{position:fixed;inset:0;z-index:1}
+    .app{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:52px 16px 14px;background:rgba(255,255,255,.45);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.6)}
+    body.dark .header{background:rgba(0,0,0,.5);border-bottom-color:rgba(255,255,255,.08)}
+    .htitle{font-family:'Noto Serif JP',serif;font-size:22px;font-weight:700;color:#1a1a1a}
+    body.dark .htitle{color:white}
+    .nbtn{padding:8px 16px;border-radius:12px;border:none;background:var(--orange);color:white;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 4px 12px rgba(255,107,0,.3)}
+    .nbtn:active{transform:scale(.95)}
+    .tabs{display:flex;padding:12px 16px;background:rgba(255,255,255,.3);backdrop-filter:blur(10px);gap:8px}
+    body.dark .tabs{background:rgba(0,0,0,.3)}
+    .tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;color:#999;cursor:pointer;border-radius:12px;transition:.2s}
+    .tab.active{background:var(--orange);color:white;box-shadow:0 4px 12px rgba(255,107,0,.3)}
+    .content{flex:1;overflow-y:auto;padding:8px 0 calc(var(--nav) + 16px)}
+    .content::-webkit-scrollbar{display:none}
+    .slbl{padding:8px 16px 4px;font-size:11px;font-weight:700;color:var(--orange);letter-spacing:1.5px;text-transform:uppercase}
+    .bc{margin:4px 12px;padding:16px;border-radius:18px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7);backdrop-filter:blur(12px);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:14px}
+    body.dark .bc{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)}
+    .bc:active{transform:scale(.98)}
+    .bav{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:2px solid rgba(255,255,255,.4)}
+    .binfo{flex:1;min-width:0}
+    .bname{font-size:15px;font-weight:700;color:#1a1a1a;display:flex;align-items:center;gap:6px;margin-bottom:3px}
+    body.dark .bname{color:white}
+    .busr{font-size:12px;color:var(--orange);font-weight:600;margin-bottom:3px}
+    .bdesc{font-size:12px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    body.dark .bdesc{color:rgba(255,255,255,.4)}
+    .bbadge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(255,107,0,.12);color:var(--orange);flex-shrink:0}
+    .vbadge{width:16px;height:16px;border-radius:50%;background:white;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+    .vbadge svg{width:10px;height:10px}
+    .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center}
+    .empty-icon{font-size:48px;margin-bottom:12px;opacity:.7}
+    .empty-title{font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
+    body.dark .empty-title{color:white}
+    .empty-sub{font-size:12px;color:#999;line-height:1.6}
+    .modal-ov{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:none;align-items:flex-end}
+    .modal-ov.show{display:flex}
+    .modal{width:100%;background:rgba(255,255,255,.97);backdrop-filter:blur(30px);border-radius:24px 24px 0 0;padding:24px 20px 44px;animation:su .35s ease}
+    body.dark .modal{background:rgba(18,18,18,.98)}
+    @keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .mhandle{width:36px;height:4px;border-radius:2px;background:#ddd;margin:0 auto 20px}
+    .mtitle{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:20px}
+    body.dark .mtitle{color:white}
+    .minput{width:100%;padding:14px 16px;border-radius:14px;margin-bottom:12px;border:1px solid rgba(0,0,0,.1);background:rgba(255,255,255,.8);font-family:'Montserrat',sans-serif;font-size:14px;color:#1a1a1a;outline:none}
+    body.dark .minput{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:white}
+    .minput:focus{border-color:var(--orange)}
+    .msave{width:100%;padding:15px;border-radius:14px;border:none;background:var(--orange);color:white;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
+    .bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);display:flex;align-items:center;justify-content:space-around;background:rgba(255,255,255,.6);border-top:1px solid rgba(255,255,255,.7);backdrop-filter:blur(20px);z-index:10;padding-bottom:8px}
+    body.dark .bnav{background:rgba(10,10,10,.75);border-top-color:rgba(255,255,255,.1)}
+    .ni{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 16px;border-radius:14px;transition:.2s;flex:1}
+    .ni:active{transform:scale(.92)}
+    .nicon{font-size:22px;transition:transform .2s}
+    .nlabel{font-size:10px;font-weight:600;color:#aaa;letter-spacing:.5px}
+    .ni.active .nlabel{color:var(--orange)}
+    .ni.active .nicon{transform:scale(1.15)}
   </style>
 </head>
 <body class="light">
-  <div class="bg-image"></div>
-  <div class="bg-overlay"></div>
-
-  <div class="app">
-    <div class="header">
-      <div class="header-title">Боты 🤖</div>
-      <button class="new-btn" onclick="openCreate()">+ Создать бота</button>
-    </div>
-
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('my')">Мои боты</div>
-      <div class="tab" onclick="switchTab('popular')">Популярные</div>
-    </div>
-
-    <div class="content" id="content">
-
-      <!-- SYSTEM BOTS -->
-      <div style="padding:8px 16px 4px; font-size:11px; font-weight:700; color:var(--orange); letter-spacing:1.5px; text-transform:uppercase;">Системные</div>
-
-      <div class="bot-card">
-        <div class="bot-avatar" style="background:linear-gradient(135deg,#FF6B00,#ff3d00)">🏮</div>
-        <div class="bot-info">
-          <div class="bot-name">
-            Keyji•Creator•News
-            <span class="verified-small"><svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#FF6B00"/><path d="M2.5 5l1.5 1.5 3-3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          </div>
-          <div class="bot-username">@keyjicreatorbot</div>
-          <div class="bot-desc">Новости и уведомления от создателя Keyji</div>
-        </div>
-        <div class="bot-badge">Системный</div>
-      </div>
-
-      <div class="bot-card">
-        <div class="bot-avatar" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)">🆔</div>
-        <div class="bot-info">
-          <div class="bot-name">Info•id
-            <span class="verified-small"><svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#FF6B00"/><path d="M2.5 5l1.5 1.5 3-3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          </div>
-          <div class="bot-username">@keyjiidbot</div>
-          <div class="bot-desc">Узнай свой ID в приложении</div>
-        </div>
-        <div class="bot-badge">Системный</div>
-      </div>
-
-      <div class="bot-card">
-        <div class="bot-avatar" style="background:linear-gradient(135deg,#e17055,#d63031)">🛡</div>
-        <div class="bot-info">
-          <div class="bot-name">Spam•report
-            <span class="verified-small"><svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#FF6B00"/><path d="M2.5 5l1.5 1.5 3-3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          </div>
-          <div class="bot-username">@spamkeyjibot</div>
-          <div class="bot-desc">Обжалование блокировки аккаунта</div>
-        </div>
-        <div class="bot-badge">Системный</div>
-      </div>
-
-      <div style="padding:8px 16px 4px; font-size:11px; font-weight:700; color:var(--orange); letter-spacing:1.5px; text-transform:uppercase; margin-top:8px;">Мои боты</div>
-
-      <div class="empty-state">
-        <div class="empty-emoji">🤖</div>
-        <div class="empty-title">Нет ботов</div>
-        <div class="empty-sub">Создай своего первого бота<br>и автоматизируй всё что угодно</div>
-      </div>
-
-    </div>
+<div class="bg"></div><div class="bgo"></div>
+<div class="app">
+  <div class="header">
+    <div class="htitle">Боты 🤖</div>
+    <button class="nbtn" onclick="openCreate()">+ Создать бота</button>
   </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <div class="nav-item" onclick="location.href='chats.html'"><div class="nav-icon">💬</div><div class="nav-label">Чаты</div></div>
-    <div class="nav-item active"><div class="nav-icon">🤖</div><div class="nav-label">Боты</div></div>
-    <div class="nav-item" onclick="location.href='channels.html'"><div class="nav-icon">📢</div><div class="nav-label">Каналы</div></div>
-    <div class="nav-item" onclick="location.href='groups.html'"><div class="nav-icon">👥</div><div class="nav-label">Группы</div></div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">Мои боты</div>
+    <div class="tab" onclick="switchTab(1)">Популярные</div>
   </div>
-
-  <!-- CREATE MODAL -->
-  <div class="modal-overlay" id="createModal" onclick="closeModal(event)">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Создать бота 🤖</div>
-      <input class="modal-input" type="text" placeholder="Имя бота">
-      <input class="modal-input" type="text" placeholder="@username_бота">
-      <textarea class="modal-input" rows="3" placeholder="Описание бота..."></textarea>
-      <button class="modal-save" onclick="createBot()">Создать</button>
+  <div class="content">
+    <div class="slbl">Системные</div>
+    <div class="bc" onclick="openBot('keyjicreatorbot')">
+      <div class="bav" style="background:linear-gradient(135deg,#FF6B00,#ff3d00)">🏮</div>
+      <div class="binfo">
+        <div class="bname">Keyji•Creator•News <span class="vbadge"><svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#FF6B00"/><path d="M2.5 5l1.5 1.5 3-3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="busr">@keyjicreatorbot</div>
+        <div class="bdesc">Новости и уведомления от создателя Keyji</div>
+      </div>
+      <div class="bbadge">Системный</div>
     </div>
+    <div class="bc" onclick="openBot('keyjiidbot')">
+      <div class="bav" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)">🆔</div>
+      <div class="binfo">
+        <div class="bname">Info•id <span class="vbadge"><svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#FF6B00"/><path d="M2.5 5l1.5 1.5 3-3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="busr">@keyjiidbot</div>
+        <div class="bdesc">Узнай свой ID в приложении</div>
+      </div>
+      <div class="bbadge">Системный</div>
+    </div>
+    <div class="bc" onclick="openBot('spamkeyjibot')">
+      <div class="bav" style="background:linear-gradient(135deg,#e17055,#d63031)">🛡</div>
+      <div class="binfo">
+        <div class="bname">Spam•report <span class="vbadge"><svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#FF6B00"/><path d="M2.5 5l1.5 1.5 3-3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="busr">@spamkeyjibot</div>
+        <div class="bdesc">Обжалование блокировки аккаунта</div>
+      </div>
+      <div class="bbadge">Системный</div>
+    </div>
+    <div class="slbl" style="margin-top:8px">Мои боты</div>
+    <div class="empty"><div class="empty-icon">🤖</div><div class="empty-title">Нет ботов</div><div class="empty-sub">Создай своего первого бота</div></div>
   </div>
-
-  <script>
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (tab==='my'&&i===0)||(tab==='popular'&&i===1)));
-    }
-    function openCreate() { document.getElementById('createModal').classList.add('show'); }
-    function closeModal(e) { if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('show'); }
-    function createBot() { document.getElementById('createModal').classList.remove('show'); }
-  </script>
-
-<script type="module" src="firebase.js"></script>
-
+</div>
+<div class="bnav">
+  <div class="ni" onclick="location.href='./chats.html'"><div class="nicon">💬</div><div class="nlabel">Чаты</div></div>
+  <div class="ni active"><div class="nicon">🤖</div><div class="nlabel">Боты</div></div>
+  <div class="ni" onclick="location.href='./channels.html'"><div class="nicon">📢</div><div class="nlabel">Каналы</div></div>
+  <div class="ni" onclick="location.href='./groups.html'"><div class="nicon">👥</div><div class="nlabel">Группы</div></div>
+</div>
+<div class="modal-ov" id="createModal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">Создать бота 🤖</div>
+    <input class="minput" type="text" placeholder="Имя бота">
+    <input class="minput" type="text" placeholder="@username_бота">
+    <textarea class="minput" rows="3" placeholder="Описание..."></textarea>
+    <button class="msave" onclick="closeM()">Создать</button>
+  </div>
+</div>
+<script>
+  const FC={apiKey:"AIzaSyDrWwIDh_Y8Fji0KWiVbR2EcmUHl5c6mHM",authDomain:"keyji-974fb.firebaseapp.com",projectId:"keyji-974fb",storageBucket:"keyji-974fb.firebasestorage.app",messagingSenderId:"442818696289",appId:"1:442818696289:web:5ed15e6e31fb85ef2bc620"};
+  if(!firebase.apps.length)firebase.initializeApp(FC);
+  const auth=firebase.auth();
+  let isDark=localStorage.getItem('keyji_theme')==='dark';
+  if(isDark)document.body.className='dark';
+  auth.onAuthStateChanged(u=>{if(!u)window.location.href='./index.html';});
+  function switchTab(i){document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));}
+  function openCreate(){document.getElementById('createModal').classList.add('show');}
+  function closeModal(e){if(e.target.classList.contains('modal-ov'))e.target.classList.remove('show');}
+  function closeM(){document.getElementById('createModal').classList.remove('show');}
+  function openBot(name){alert('Открываю бота @'+name);}
+</script>
 </body>
-</html>
