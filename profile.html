@@ -1,402 +1,211 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
   <title>Keyji — Профиль</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    :root { --orange:#FF6B00; --orange-light:#FF8C38; }
-    body { font-family:'Montserrat',sans-serif; min-height:100vh; overflow-x:hidden; background:#f5f0eb; }
-    body.dark { background:#0a0a0a; }
-
-    .bg-image { position:fixed; inset:0; z-index:0; background-size:cover; background-position:center; }
-    body.light .bg-image { background-image:url('https://i.ibb.co/zTS53bWc/file-000000004b807246a5c9c164255caecf.jpg'); }
-    body.dark .bg-image { background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg'); }
-    body.light .bg-overlay { background:rgba(255,255,255,0.2); }
-    body.dark .bg-overlay { background:rgba(0,0,0,0.5); }
-    .bg-overlay { position:fixed; inset:0; z-index:1; }
-
-    .app { position:relative; z-index:2; min-height:100vh; padding-bottom:40px; }
-
-    /* HEADER */
-    .header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:52px 16px 16px;
-      position:sticky; top:0; z-index:10;
-      background:rgba(255,255,255,0.5); backdrop-filter:blur(20px);
-      border-bottom:1px solid rgba(255,255,255,0.6);
-    }
-    body.dark .header { background:rgba(0,0,0,0.55); border-bottom-color:rgba(255,255,255,0.08); }
-    .header-left { display:flex; align-items:center; gap:12px; }
-    .back-btn {
-      width:38px; height:38px; border-radius:12px;
-      border:1px solid rgba(255,255,255,0.5); background:rgba(255,255,255,0.3);
-      backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center;
-      font-size:18px; cursor:pointer; color:#333; transition:all 0.2s;
-    }
-    body.dark .back-btn { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); color:white; }
-    .back-btn:active { transform:scale(0.92); }
-    .header-title { font-family:'Noto Serif JP',serif; font-size:20px; font-weight:700; color:#1a1a1a; }
-    body.dark .header-title { color:white; }
-    .edit-btn {
-      padding:8px 16px; border-radius:12px; border:1px solid rgba(255,107,0,0.3);
-      background:rgba(255,107,0,0.1); color:var(--orange);
-      font-family:'Montserrat',sans-serif; font-size:13px; font-weight:700;
-      cursor:pointer; transition:all 0.2s;
-    }
-    .edit-btn:active { background:rgba(255,107,0,0.2); transform:scale(0.95); }
-
-    /* AVATAR SECTION */
-    .avatar-section {
-      display:flex; flex-direction:column; align-items:center;
-      padding:32px 16px 24px; position:relative;
-    }
-    .avatar-carousel { position:relative; width:110px; height:110px; }
-    .avatar-main {
-      width:110px; height:110px; border-radius:30px;
-      background:linear-gradient(135deg,var(--orange),#ff3d00);
-      display:flex; align-items:center; justify-content:center;
-      font-size:44px; font-weight:700; color:white;
-      border:3px solid rgba(255,255,255,0.5);
-      box-shadow:0 8px 32px rgba(255,107,0,0.3);
-      cursor:pointer; overflow:hidden;
-    }
-    .avatar-main img { width:100%; height:100%; object-fit:cover; }
-    .avatar-count {
-      position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
-      background:rgba(0,0,0,0.6); color:white; font-size:10px; font-weight:700;
-      padding:3px 10px; border-radius:20px; white-space:nowrap;
-      backdrop-filter:blur(8px);
-    }
-
-    /* Dots for photos */
-    .avatar-dots { display:flex; gap:4px; margin-top:20px; }
-    .avatar-dot { width:6px; height:6px; border-radius:50%; background:rgba(0,0,0,0.15); transition:all 0.2s; }
-    body.dark .avatar-dot { background:rgba(255,255,255,0.2); }
-    .avatar-dot.active { background:var(--orange); width:16px; border-radius:3px; }
-
-    .profile-name-big {
-      font-family:'Noto Serif JP',serif; font-size:24px; font-weight:700;
-      color:#1a1a1a; margin-top:14px; text-align:center;
-      display:flex; align-items:center; gap:8px;
-    }
-    body.dark .profile-name-big { color:white; }
-    .verified-badge {
-      width:22px; height:22px; border-radius:50%; background:white;
-      display:inline-flex; align-items:center; justify-content:center;
-      box-shadow:0 2px 8px rgba(0,0,0,0.15);
-    }
-    .verified-badge svg { width:14px; height:14px; }
-
-    .profile-username-big { font-size:14px; color:var(--orange); font-weight:600; margin-top:4px; }
-    .profile-bio-big { font-size:13px; color:#888; margin-top:6px; text-align:center; line-height:1.5; max-width:260px; }
-    body.dark .profile-bio-big { color:rgba(255,255,255,0.45); }
-
-    /* STATS */
-    .stats-row {
-      display:flex; gap:12px; margin:0 16px 8px; 
-    }
-    .stat-card {
-      flex:1; padding:16px 12px; border-radius:16px; text-align:center;
-      background:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.7);
-      backdrop-filter:blur(12px);
-    }
-    body.dark .stat-card { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.1); }
-    .stat-num { font-size:20px; font-weight:700; color:#1a1a1a; }
-    body.dark .stat-num { color:white; }
-    .stat-label { font-size:11px; color:#999; margin-top:2px; font-weight:500; }
-    body.dark .stat-label { color:rgba(255,255,255,0.35); }
-
-    /* ACTION BUTTONS */
-    .action-row { display:flex; gap:10px; margin:0 16px 16px; }
-    .act-btn {
-      flex:1; padding:13px; border-radius:14px; border:none;
-      display:flex; flex-direction:column; align-items:center; gap:4px;
-      cursor:pointer; transition:all 0.2s;
-      background:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.7);
-      backdrop-filter:blur(12px);
-    }
-    body.dark .act-btn { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.1); }
-    .act-btn:active { transform:scale(0.95); }
-    .act-btn.primary { background:var(--orange); border-color:var(--orange); }
-    .act-btn.primary:active { background:var(--orange-light); }
-    .act-icon { font-size:20px; }
-    .act-label { font-size:11px; font-weight:600; color:#555; }
-    body.dark .act-label { color:rgba(255,255,255,0.6); }
-    .act-btn.primary .act-label { color:white; }
-
-    /* INFO SECTION */
-    .section { margin:8px 16px 0; }
-    .section-title {
-      font-size:11px; font-weight:700; color:var(--orange);
-      letter-spacing:1.5px; text-transform:uppercase; padding:12px 4px 8px;
-    }
-    .section-card {
-      background:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.7);
-      backdrop-filter:blur(16px); border-radius:18px; overflow:hidden;
-    }
-    body.dark .section-card { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.1); }
-    .info-item {
-      display:flex; align-items:center; gap:14px; padding:14px 16px;
-      position:relative; transition:background 0.15s;
-    }
-    .info-item:not(:last-child)::after {
-      content:''; position:absolute; bottom:0; left:54px; right:0;
-      height:1px; background:rgba(0,0,0,0.06);
-    }
-    body.dark .info-item:not(:last-child)::after { background:rgba(255,255,255,0.06); }
-    .info-icon {
-      width:36px; height:36px; border-radius:10px;
-      display:flex; align-items:center; justify-content:center; font-size:18px;
-    }
-    .info-content { flex:1; }
-    .info-label { font-size:11px; color:#aaa; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px; }
-    .info-value { font-size:14px; font-weight:600; color:#1a1a1a; }
-    body.dark .info-value { color:rgba(255,255,255,0.9); }
-
-    /* PHOTOS GRID */
-    .photos-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin:0 16px; border-radius:16px; overflow:hidden; }
-    .photo-thumb {
-      aspect-ratio:1; background:rgba(255,255,255,0.3);
-      display:flex; align-items:center; justify-content:center;
-      font-size:24px; cursor:pointer; transition:opacity 0.2s;
-      overflow:hidden;
-    }
-    .photo-thumb:active { opacity:0.7; }
-    .photo-thumb img { width:100%; height:100%; object-fit:cover; }
-    .photo-placeholder { background:rgba(255,107,0,0.1); }
-
-    /* EDIT MODAL */
-    .modal-overlay {
-      position:fixed; inset:0; z-index:100;
-      background:rgba(0,0,0,0.5); backdrop-filter:blur(8px);
-      display:none; align-items:flex-end;
-    }
-    .modal-overlay.show { display:flex; }
-    .modal {
-      width:100%; background:rgba(255,255,255,0.95);
-      backdrop-filter:blur(30px); border-radius:24px 24px 0 0;
-      padding:24px 20px 40px; animation:slideUp 0.35s ease;
-    }
-    body.dark .modal { background:rgba(20,20,20,0.97); }
-    @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
-    .modal-handle { width:36px; height:4px; border-radius:2px; background:#ddd; margin:0 auto 20px; }
-    body.dark .modal-handle { background:#444; }
-    .modal-title { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:700; color:#1a1a1a; margin-bottom:20px; }
-    body.dark .modal-title { color:white; }
-    .modal-input {
-      width:100%; padding:14px 16px; border-radius:14px; margin-bottom:12px;
-      border:1px solid rgba(0,0,0,0.1); background:rgba(255,255,255,0.8);
-      font-family:'Montserrat',sans-serif; font-size:14px; color:#1a1a1a; outline:none;
-      transition:border-color 0.2s;
-    }
-    body.dark .modal-input { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.12); color:white; }
-    .modal-input:focus { border-color:var(--orange); }
-    .modal-save {
-      width:100%; padding:15px; border-radius:14px; border:none;
-      background:var(--orange); color:white; font-family:'Montserrat',sans-serif;
-      font-size:15px; font-weight:700; cursor:pointer; transition:all 0.2s; margin-top:4px;
-    }
-    .modal-save:active { background:var(--orange-light); transform:scale(0.98); }
-
-    /* Sakura petals */
-    .petal {
-      position:fixed; z-index:200; pointer-events:none;
-      font-size:16px; animation:petalFall linear forwards;
-    }
-    @keyframes petalFall {
-      0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
-      100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
-    }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{--orange:#FF6B00}
+    body{font-family:'Montserrat',sans-serif;min-height:100vh;background:#f5f0eb;overflow-x:hidden}
+    body.dark{background:#0a0a0a}
+    .bg{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center}
+    body.light .bg{background-image:url('https://i.ibb.co/zTS53bWc/file-000000004b807246a5c9c164255caecf.jpg')}
+    body.dark .bg{background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg')}
+    body.light .bgo{background:rgba(255,255,255,.2)}
+    body.dark .bgo{background:rgba(0,0,0,.5)}
+    .bgo{position:fixed;inset:0;z-index:1}
+    .app{position:relative;z-index:2;min-height:100vh;padding-bottom:40px}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:52px 16px 16px;position:sticky;top:0;z-index:10;background:rgba(255,255,255,.5);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.6)}
+    body.dark .header{background:rgba(0,0,0,.55);border-bottom-color:rgba(255,255,255,.08)}
+    .back{width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.3);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:#333;transition:.2s}
+    body.dark .back{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white}
+    .htitle{font-family:'Noto Serif JP',serif;font-size:20px;font-weight:700;color:#1a1a1a}
+    body.dark .htitle{color:white}
+    .ebtn{padding:8px 16px;border-radius:12px;border:1px solid rgba(255,107,0,.3);background:rgba(255,107,0,.1);color:var(--orange);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+    .ebtn:active{background:rgba(255,107,0,.2);transform:scale(.95)}
+    .avsec{display:flex;flex-direction:column;align-items:center;padding:32px 16px 24px;position:relative}
+    .avwrap{position:relative;width:110px;height:110px}
+    .avmain{width:110px;height:110px;border-radius:30px;background:linear-gradient(135deg,var(--orange),#ff3d00);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.5);box-shadow:0 8px 32px rgba(255,107,0,.3);cursor:pointer;overflow:hidden}
+    .avmain img{width:100%;height:100%;object-fit:cover}
+    .avcnt{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;backdrop-filter:blur(8px)}
+    .avdots{display:flex;gap:4px;margin-top:20px}
+    .avdot{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.15);transition:.2s}
+    body.dark .avdot{background:rgba(255,255,255,.2)}
+    .avdot.active{background:var(--orange);width:16px;border-radius:3px}
+    .pname{font-family:'Noto Serif JP',serif;font-size:24px;font-weight:700;color:#1a1a1a;margin-top:14px;text-align:center;display:flex;align-items:center;gap:8px}
+    body.dark .pname{color:white}
+    .vbadge{width:22px;height:22px;border-radius:50%;background:white;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+    .vbadge svg{width:14px;height:14px}
+    .pusr{font-size:14px;color:var(--orange);font-weight:600;margin-top:4px}
+    .pbio{font-size:13px;color:#888;margin-top:6px;text-align:center;line-height:1.5;max-width:260px}
+    body.dark .pbio{color:rgba(255,255,255,.45)}
+    .stats{display:flex;gap:12px;margin:0 16px 8px}
+    .stat{flex:1;padding:16px 12px;border-radius:16px;text-align:center;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.7);backdrop-filter:blur(12px)}
+    body.dark .stat{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
+    .snum{font-size:20px;font-weight:700;color:#1a1a1a}
+    body.dark .snum{color:white}
+    .slbl{font-size:11px;color:#999;margin-top:2px;font-weight:500}
+    body.dark .slbl{color:rgba(255,255,255,.35)}
+    .acts{display:flex;gap:10px;margin:0 16px 16px}
+    .abt{flex:1;padding:13px;border-radius:14px;border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.55);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:.2s}
+    body.dark .abt{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
+    .abt:active{transform:scale(.95)}
+    .abt.primary{background:var(--orange);border-color:var(--orange)}
+    .aicon{font-size:20px}
+    .albl{font-size:11px;font-weight:600;color:#555}
+    body.dark .albl{color:rgba(255,255,255,.6)}
+    .abt.primary .albl{color:white}
+    .sec{margin:8px 16px 0}
+    .sectitle{font-size:11px;font-weight:700;color:var(--orange);letter-spacing:1.5px;text-transform:uppercase;padding:12px 4px 8px}
+    .seccard{background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.7);backdrop-filter:blur(16px);border-radius:18px;overflow:hidden}
+    body.dark .seccard{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
+    .iitem{display:flex;align-items:center;gap:14px;padding:14px 16px;position:relative;transition:background .15s}
+    .iitem:not(:last-child)::after{content:'';position:absolute;bottom:0;left:54px;right:0;height:1px;background:rgba(0,0,0,.06)}
+    body.dark .iitem:not(:last-child)::after{background:rgba(255,255,255,.06)}
+    .iiicon{font-size:22px}
+    .iicont{flex:1}
+    .iilbl{font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+    .iival{font-size:14px;font-weight:600;color:#1a1a1a}
+    body.dark .iival{color:rgba(255,255,255,.9)}
+    .modal-ov{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:none;align-items:flex-end}
+    .modal-ov.show{display:flex}
+    .modal{width:100%;background:rgba(255,255,255,.97);backdrop-filter:blur(30px);border-radius:24px 24px 0 0;padding:24px 20px 44px;animation:su .35s ease}
+    body.dark .modal{background:rgba(18,18,18,.98)}
+    @keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .mhandle{width:36px;height:4px;border-radius:2px;background:#ddd;margin:0 auto 20px}
+    body.dark .mhandle{background:#444}
+    .mtitle{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:20px}
+    body.dark .mtitle{color:white}
+    .minput{width:100%;padding:14px 16px;border-radius:14px;margin-bottom:12px;border:1px solid rgba(0,0,0,.1);background:rgba(255,255,255,.8);font-family:'Montserrat',sans-serif;font-size:14px;color:#1a1a1a;outline:none}
+    body.dark .minput{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:white}
+    .minput:focus{border-color:var(--orange)}
+    .msave{width:100%;padding:15px;border-radius:14px;border:none;background:var(--orange);color:white;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;transition:.2s}
+    .msave:active{background:#FF8C38;transform:scale(.98)}
+    @keyframes petalFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+    .petal{position:fixed;z-index:9999;pointer-events:none;animation:petalFall linear forwards}
   </style>
 </head>
 <body class="light">
-  <div class="bg-image"></div>
-  <div class="bg-overlay"></div>
-
-  <div class="app">
-    <div class="header">
-      <div class="header-left">
-        <div class="back-btn" onclick="history.back()">←</div>
-        <div class="header-title">Профиль</div>
-      </div>
-      <div class="edit-btn" onclick="openEdit()">Изменить</div>
+<div class="bg"></div><div class="bgo"></div>
+<div class="app">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="back" onclick="location.href='./chats.html'">←</div>
+      <div class="htitle">Профиль</div>
     </div>
-
-    <!-- AVATAR -->
-    <div class="avatar-section">
-      <div class="avatar-carousel" id="avatarCarousel">
-        <div class="avatar-main" id="avatarMain" onclick="nextPhoto()">S</div>
-        <div class="avatar-count" id="avatarCount">1 / 1</div>
-      </div>
-      <div class="avatar-dots" id="avatarDots">
-        <div class="avatar-dot active"></div>
-      </div>
-      <div class="profile-name-big">
-        Said
-        <span class="verified-badge">
-          <svg viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="7" fill="#FF6B00"/>
-            <path d="M4 7l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-      </div>
-      <div class="profile-username-big">@saidspit</div>
-      <div class="profile-bio-big">Создатель Keyji 🏮<br>Building something beautiful</div>
-    </div>
-
-    <!-- STATS -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-num">1</div>
-        <div class="stat-label">Фото</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">0</div>
-        <div class="stat-label">Подписчики</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="idNum">10482</div>
-        <div class="stat-label">ID</div>
-      </div>
-    </div>
-
-    <!-- ACTIONS -->
-    <div class="section"><div class="section-title"> </div></div>
-    <div class="action-row">
-      <div class="act-btn primary">
-        <div class="act-icon">✏️</div>
-        <div class="act-label">Изменить</div>
-      </div>
-      <div class="act-btn" onclick="addPhoto()">
-        <div class="act-icon">📷</div>
-        <div class="act-label">Фото</div>
-      </div>
-      <div class="act-btn">
-        <div class="act-icon">🔗</div>
-        <div class="act-label">Поделиться</div>
-      </div>
-      <div class="act-btn">
-        <div class="act-icon">🔍</div>
-        <div class="act-label">QR-код</div>
-      </div>
-    </div>
-
-    <!-- INFO -->
-    <div class="section">
-      <div class="section-title">Информация</div>
-      <div class="section-card">
-        <div class="info-item">
-          <div class="info-icon">📧</div>
-          <div class="info-content">
-            <div class="info-label">Email</div>
-            <div class="info-value">saidspit01@gmail.com</div>
-          </div>
-        </div>
-        <div class="info-item">
-          <div class="info-icon">🌍</div>
-          <div class="info-content">
-            <div class="info-label">Страна</div>
-            <div class="info-value">Скрыта</div>
-          </div>
-        </div>
-        <div class="info-item">
-          <div class="info-icon">🟢</div>
-          <div class="info-content">
-            <div class="info-label">Статус</div>
-            <div class="info-value" style="color:var(--orange)">В сети</div>
-          </div>
-        </div>
-        <div class="info-item">
-          <div class="info-icon">📅</div>
-          <div class="info-content">
-            <div class="info-label">В Keyji с</div>
-            <div class="info-value">Май 2026</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PHOTOS -->
-    <div class="section">
-      <div class="section-title">Фотографии (1/100)</div>
-      <div class="photos-grid" id="photosGrid">
-        <div class="photo-thumb photo-placeholder">S</div>
-        <div class="photo-thumb photo-placeholder" style="opacity:0.3">+</div>
-        <div class="photo-thumb photo-placeholder" style="opacity:0.3">+</div>
-      </div>
-    </div>
-
-    <div style="height:40px"></div>
+    <div class="ebtn" onclick="openEdit()">Изменить</div>
   </div>
-
-  <!-- EDIT MODAL -->
-  <div class="modal-overlay" id="editModal" onclick="closeEdit(event)">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Редактировать профиль</div>
-      <input class="modal-input" type="text" placeholder="Имя" value="Said">
-      <input class="modal-input" type="text" placeholder="@username" value="@saidspit">
-      <textarea class="modal-input" rows="3" placeholder="О себе...">Создатель Keyji 🏮</textarea>
-      <button class="modal-save" onclick="saveProfile()">Сохранить</button>
+  <div class="avsec">
+    <div class="avwrap">
+      <div class="avmain" id="av-main" onclick="nextPhoto()">?</div>
+      <div class="avcnt" id="av-cnt">1 / 1</div>
+    </div>
+    <div class="avdots" id="av-dots"><div class="avdot active"></div></div>
+    <div class="pname" id="p-name">...</div>
+    <div class="pusr" id="p-usr">@...</div>
+    <div class="pbio" id="p-bio">...</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="snum" id="s-photos">0</div><div class="slbl">Фото</div></div>
+    <div class="stat"><div class="snum" id="s-id">—</div><div class="slbl">ID</div></div>
+    <div class="stat"><div class="snum">0</div><div class="slbl">Подписчики</div></div>
+  </div>
+  <div class="acts">
+    <div class="abt primary" onclick="openEdit()"><div class="aicon">✏️</div><div class="albl">Изменить</div></div>
+    <div class="abt" onclick="addPhoto()"><div class="aicon">📷</div><div class="albl">Фото</div></div>
+    <div class="abt"><div class="aicon">🔗</div><div class="albl">Поделиться</div></div>
+    <div class="abt"><div class="aicon">📷</div><div class="albl">QR-код</div></div>
+  </div>
+  <div class="sec">
+    <div class="sectitle">Информация</div>
+    <div class="seccard">
+      <div class="iitem"><div class="iiicon">📧</div><div class="iicont"><div class="iilbl">Email</div><div class="iival" id="i-email">—</div></div></div>
+      <div class="iitem"><div class="iiicon">🌍</div><div class="iicont"><div class="iilbl">Страна</div><div class="iival">Скрыта</div></div></div>
+      <div class="iitem"><div class="iiicon">🟢</div><div class="iicont"><div class="iilbl">Статус</div><div class="iival" style="color:var(--orange)">В сети</div></div></div>
     </div>
   </div>
+  <div style="height:40px"></div>
+</div>
 
-  <script>
-    let photoIndex = 0;
-    const photos = ['S'];
+<div class="modal-ov" id="editModal" onclick="closeEdit(event)">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">Редактировать профиль</div>
+    <input class="minput" id="e-name" type="text" placeholder="Имя">
+    <input class="minput" id="e-username" type="text" placeholder="@username">
+    <textarea class="minput" id="e-bio" rows="3" placeholder="О себе..."></textarea>
+    <button class="msave" onclick="saveProfile()">Сохранить</button>
+  </div>
+</div>
 
-    function nextPhoto() {
-      photoIndex = (photoIndex + 1) % photos.length;
-      updateAvatar();
+<script>
+  const FC={apiKey:"AIzaSyDrWwIDh_Y8Fji0KWiVbR2EcmUHl5c6mHM",authDomain:"keyji-974fb.firebaseapp.com",projectId:"keyji-974fb",storageBucket:"keyji-974fb.firebasestorage.app",messagingSenderId:"442818696289",appId:"1:442818696289:web:5ed15e6e31fb85ef2bc620"};
+  if(!firebase.apps.length)firebase.initializeApp(FC);
+  const auth=firebase.auth();const db=firebase.firestore();const storage=firebase.storage();
+  let me=null,userData=null,photos=[],photoIdx=0;
+  let isDark=localStorage.getItem('keyji_theme')==='dark';
+  if(isDark)document.body.className='dark';
+
+  auth.onAuthStateChanged(async user=>{
+    if(!user){window.location.href='./index.html';return;}
+    me=user;
+    const d=await db.collection('users').doc(user.uid).get();
+    if(d.exists){
+      userData=d.data();
+      document.getElementById('p-name').innerHTML=userData.name+(userData.verified?'<span class="vbadge"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#FF6B00"/><path d="M4 7l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>':'');
+      document.getElementById('p-usr').textContent='@'+(userData.username||'');
+      document.getElementById('p-bio').textContent=userData.bio||'Привет, я использую Keyji!';
+      document.getElementById('i-email').textContent=userData.hideEmail?'Скрыт':(userData.email||'—');
+      document.getElementById('s-id').textContent=user.uid.slice(0,6).toUpperCase();
+      photos=userData.photos||[];
+      if(userData.avatar){const img=document.createElement('img');img.src=userData.avatar;document.getElementById('av-main').innerHTML='';document.getElementById('av-main').appendChild(img);}
+      else document.getElementById('av-main').textContent=(userData.name||'?')[0].toUpperCase();
+      document.getElementById('s-photos').textContent=photos.length||1;
+      document.getElementById('av-cnt').textContent='1 / '+(photos.length||1);
     }
+  });
 
-    function updateAvatar() {
-      document.getElementById('avatarCount').textContent = (photoIndex+1) + ' / ' + photos.length;
-      const dots = document.getElementById('avatarDots');
-      dots.querySelectorAll('.avatar-dot').forEach((d,i) => d.classList.toggle('active', i === photoIndex));
-    }
+  function nextPhoto(){photoIdx=(photoIdx+1)%(photos.length||1);}
 
-    function addPhoto() {
-      spawnPetals();
-    }
+  function openEdit(){
+    document.getElementById('e-name').value=userData?.name||'';
+    document.getElementById('e-username').value=userData?.username||'';
+    document.getElementById('e-bio').value=userData?.bio||'';
+    document.getElementById('editModal').classList.add('show');
+  }
+  function closeEdit(e){if(e.target===document.getElementById('editModal'))document.getElementById('editModal').classList.remove('show');}
 
-    function openEdit() {
-      document.getElementById('editModal').classList.add('show');
-    }
+  async function saveProfile(){
+    const name=document.getElementById('e-name').value.trim();
+    const username=document.getElementById('e-username').value.trim().replace('@','').toLowerCase();
+    const bio=document.getElementById('e-bio').value.trim();
+    if(!name)return;
+    await db.collection('users').doc(me.uid).update({name,username,bio});
+    await me.updateProfile({displayName:name});
+    document.getElementById('editModal').classList.remove('show');
+    spawnPetals();
+    location.reload();
+  }
 
-    function closeEdit(e) {
-      if (e.target === document.getElementById('editModal')) {
-        document.getElementById('editModal').classList.remove('show');
-      }
-    }
+  async function addPhoto(){
+    const input=document.createElement('input');input.type='file';input.accept='image/*';
+    input.onchange=async e=>{
+      const file=e.target.files[0];if(!file)return;
+      const ref=storage.ref('avatars/'+me.uid+'/'+Date.now());
+      await ref.put(file);const url=await ref.getDownloadURL();
+      const newPhotos=[url,...(userData?.photos||[])].slice(0,100);
+      await db.collection('users').doc(me.uid).update({avatar:url,photos:newPhotos});
+      spawnPetals();location.reload();
+    };input.click();
+  }
 
-    function saveProfile() {
-      document.getElementById('editModal').classList.remove('show');
-      spawnPetals();
-    }
-
-    // Sakura petals effect
-    function spawnPetals(count=18) {
-      for (let i=0; i<count; i++) {
-        setTimeout(() => {
-          const p = document.createElement('div');
-          p.className = 'petal';
-          p.textContent = ['🌸','🌺','🍃'][Math.floor(Math.random()*3)];
-          p.style.left = Math.random()*100 + 'vw';
-          p.style.top = '-30px';
-          p.style.fontSize = (12+Math.random()*14) + 'px';
-          p.style.animationDuration = (2+Math.random()*3) + 's';
-          document.body.appendChild(p);
-          setTimeout(() => p.remove(), 5000);
-        }, i*80);
-      }
-    }
-  </script>
-
-<script type="module" src="firebase.js"></script>
-
+  function spawnPetals(){for(let i=0;i<18;i++){setTimeout(()=>{const p=document.createElement('div');p.className='petal';p.textContent=['🌸','🌺','🍃','✨'][Math.floor(Math.random()*4)];p.style.cssText=`left:${Math.random()*100}vw;top:-30px;font-size:${12+Math.random()*14}px;animation-duration:${2+Math.random()*3}s`;document.body.appendChild(p);setTimeout(()=>p.remove(),5000);},i*80);}}
+</script>
 </body>
 </html>
