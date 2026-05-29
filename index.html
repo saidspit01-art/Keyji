@@ -12,9 +12,9 @@
   <link rel="icon" href="./logo.png"/>
   <link rel="apple-touch-icon" href="./logo.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     :root{--o:#FF6B00;--ol:#FF8C38;--g:rgba(255,255,255,0.08);--gb:rgba(255,255,255,0.15)}
@@ -114,98 +114,204 @@
   </div>
 </div>
 <script>
-  firebase.initializeApp({apiKey:"AIzaSyDrWwIDh_Y8Fji0KWiVbR2EcmUHl5c6mHM",authDomain:"keyji-974fb.firebaseapp.com",projectId:"keyji-974fb",storageBucket:"keyji-974fb.firebasestorage.app",messagingSenderId:"442818696289",appId:"1:442818696289:web:5ed15e6e31fb85ef2bc620"});
-  const auth=firebase.auth(),db=firebase.firestore();
-  let isReg=false;
+  // Инициализация Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrWwIDh_Y8Fji0KWiVbR2EcmUHl5c6mHM",
+    authDomain: "keyji-974fb.firebaseapp.com",
+    projectId: "keyji-974fb",
+    storageBucket: "keyji-974fb.firebasestorage.app",
+    messagingSenderId: "442818696289",
+    appId: "1:442818696289:web:5ed15e6e31fb85ef2bc620"
+  };
+  
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  let isReg = false;
 
-  auth.onAuthStateChanged(u=>{
-    if(u){window.location.href=localStorage.getItem('keyji_onboarded')?'./chats.html':'./onboarding.html';}
-  });
-
-  window.addEventListener('load',()=>{
-    setTimeout(()=>{
-      document.getElementById('splash').classList.add('hide');
-      setTimeout(()=>document.getElementById('ls').classList.add('show'),400);
-    },1800);
-  });
-
-  function toast(msg,type='err'){
-    const t=document.getElementById('toast');
-    t.textContent=msg;t.className='toast show '+type;
-    setTimeout(()=>t.classList.remove('show'),3500);
-  }
-
-  function openAuth(lang){localStorage.setItem('keyji_lang',lang);document.getElementById('auth').classList.add('show');switchTab('l');}
-  function closeAuth(){document.getElementById('auth').classList.remove('show');}
-
-  function switchTab(t){
-    isReg=t==='r';
-    document.getElementById('ltab').classList.toggle('active',!isReg);
-    document.getElementById('rtab').classList.toggle('active',isReg);
-    document.getElementById('rf').classList.toggle('show',isReg);
-    document.getElementById('atitle').textContent=isReg?'Регистрация':'Войти';
-    document.getElementById('sbtn').textContent=isReg?'Создать аккаунт':'Войти';
-  }
-
-  async function handleSubmit(){
-    const email=document.getElementById('iemail').value.trim();
-    const pass=document.getElementById('ipass').value;
-    if(!email||!pass){toast('Заполните все поля!');return;}
-    const btn=document.getElementById('sbtn');
-    btn.disabled=true;btn.textContent='...';
-    try{
-      if(isReg){
-        const name=document.getElementById('iname').value.trim();
-        const uname=document.getElementById('iusername').value.trim().replace('@','').toLowerCase();
-        if(!name||!uname){toast('Заполните имя и юзернейм!');btn.disabled=false;btn.textContent='Создать аккаунт';return;}
-        if(uname.length<3){toast('Юзернейм минимум 3 символа');btn.disabled=false;btn.textContent='Создать аккаунт';return;}
-        if(pass.length<6){toast('Пароль минимум 6 символов');btn.disabled=false;btn.textContent='Создать аккаунт';return;}
-        // Check username unique
-        const q=await db.collection('users').where('username','==',uname).get();
-        if(!q.empty){toast('Юзернейм уже занят!');btn.disabled=false;btn.textContent='Создать аккаунт';return;}
-        const cred=await auth.createUserWithEmailAndPassword(email,pass);
-        await cred.user.updateProfile({displayName:name});
-        await db.collection('users').doc(cred.user.uid).set({
-          uid:cred.user.uid,name,username:uname,email,bio:'',avatar:'',photos:[],
-          verified:false,frozen:false,hideEmail:false,hideCountry:true,hideOnline:false,
-          createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-          lastSeen:firebase.firestore.FieldValue.serverTimestamp(),online:true,
-          lang:localStorage.getItem('keyji_lang')||'ru'
+  // Проверка авторизации
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      // Проверяем, есть ли пользователь в Firestore
+      const doc = await db.collection('users').doc(user.uid).get();
+      if (!doc.exists) {
+        // Если нет — создаём
+        const username = 'user' + Math.floor(Math.random() * 99999);
+        await db.collection('users').doc(user.uid).set({
+          uid: user.uid,
+          name: user.displayName || 'User',
+          username: username,
+          email: user.email || '',
+          bio: '',
+          avatar: user.photoURL || '',
+          photos: [],
+          verified: false,
+          frozen: false,
+          online: true,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastSeen: firebase.firestore.FieldValue.serverTimestamp()
         });
-        toast('Добро пожаловать в Keyji! 🌸','ok');
-      } else {
-        await auth.signInWithEmailAndPassword(email,pass);
-        toast('С возвращением! 🏮','ok');
       }
-    } catch(e){
-      const msgs={'auth/email-already-in-use':'Email уже используется','auth/wrong-password':'Неверный пароль','auth/user-not-found':'Пользователь не найден','auth/invalid-credential':'Неверный email или пароль','auth/weak-password':'Слабый пароль','auth/invalid-email':'Неверный email'};
-      toast(msgs[e.code]||'Ошибка: '+e.message);
-      btn.disabled=false;btn.textContent=isReg?'Создать аккаунт':'Войти';
+      window.location.href = localStorage.getItem('keyji_onboarded') ? './chats.html' : './onboarding.html';
+    }
+  });
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('splash').classList.add('hide');
+      setTimeout(() => document.getElementById('ls').classList.add('show'), 400);
+    }, 1800);
+  });
+
+  function toast(msg, type = 'err') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function openAuth(lang) {
+    localStorage.setItem('keyji_lang', lang);
+    document.getElementById('auth').classList.add('show');
+    switchTab('l');
+  }
+  
+  function closeAuth() {
+    document.getElementById('auth').classList.remove('show');
+  }
+
+  function switchTab(t) {
+    isReg = t === 'r';
+    document.getElementById('ltab').classList.toggle('active', !isReg);
+    document.getElementById('rtab').classList.toggle('active', isReg);
+    document.getElementById('rf').classList.toggle('show', isReg);
+    document.getElementById('atitle').textContent = isReg ? 'Регистрация' : 'Войти';
+    document.getElementById('sbtn').textContent = isReg ? 'Создать аккаунт' : 'Войти';
+  }
+
+  async function handleSubmit() {
+    const email = document.getElementById('iemail').value.trim();
+    const pass = document.getElementById('ipass').value;
+    
+    if (!email || !pass) {
+      toast('Заполните все поля!');
+      return;
+    }
+    
+    const btn = document.getElementById('sbtn');
+    btn.disabled = true;
+    btn.textContent = '...';
+    
+    try {
+      if (isReg) {
+        const name = document.getElementById('iname').value.trim();
+        const uname = document.getElementById('iusername').value.trim().replace('@', '').toLowerCase();
+        
+        if (!name || !uname) {
+          toast('Заполните имя и юзернейм!');
+          btn.disabled = false;
+          btn.textContent = 'Создать аккаунт';
+          return;
+        }
+        
+        if (uname.length < 3) {
+          toast('Юзернейм минимум 3 символа');
+          btn.disabled = false;
+          btn.textContent = 'Создать аккаунт';
+          return;
+        }
+        
+        if (pass.length < 6) {
+          toast('Пароль минимум 6 символов');
+          btn.disabled = false;
+          btn.textContent = 'Создать аккаунт';
+          return;
+        }
+        
+        // Проверка уникальности юзернейма
+        const q = await db.collection('users').where('username', '==', uname).get();
+        if (!q.empty) {
+          toast('Юзернейм уже занят!');
+          btn.disabled = false;
+          btn.textContent = 'Создать аккаунт';
+          return;
+        }
+        
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        await cred.user.updateProfile({ displayName: name });
+        
+        await db.collection('users').doc(cred.user.uid).set({
+          uid: cred.user.uid,
+          name: name,
+          username: uname,
+          email: email,
+          bio: '',
+          avatar: '',
+          photos: [],
+          verified: false,
+          frozen: false,
+          online: true,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        toast('Добро пожаловать в Keyji! 🌸', 'ok');
+      } else {
+        await auth.signInWithEmailAndPassword(email, pass);
+        toast('С возвращением! 🏮', 'ok');
+      }
+    } catch (e) {
+      const msgs = {
+        'auth/email-already-in-use': 'Email уже используется',
+        'auth/wrong-password': 'Неверный пароль',
+        'auth/user-not-found': 'Пользователь не найден',
+        'auth/invalid-credential': 'Неверный email или пароль',
+        'auth/weak-password': 'Слабый пароль',
+        'auth/invalid-email': 'Неверный email'
+      };
+      toast(msgs[e.code] || 'Ошибка: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = isReg ? 'Создать аккаунт' : 'Войти';
     }
   }
 
-  async function handleGoogle(){
-    try{
-      const p=new firebase.auth.GoogleAuthProvider();
-      const r=await auth.signInWithPopup(p);
-      const u=r.user;
-      const doc=await db.collection('users').doc(u.uid).get();
-      if(!doc.exists){
-        await db.collection('users').doc(u.uid).set({
-          uid:u.uid,name:u.displayName||'User',username:'user'+Math.floor(Math.random()*99999),
-          email:u.email,bio:'',avatar:u.photoURL||'',photos:[],
-          verified:false,frozen:false,hideEmail:false,hideCountry:true,hideOnline:false,
-          createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-          lastSeen:firebase.firestore.FieldValue.serverTimestamp(),online:true,
-          lang:localStorage.getItem('keyji_lang')||'ru'
+  async function handleGoogle() {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await auth.signInWithPopup(provider);
+      const user = result.user;
+      
+      const doc = await db.collection('users').doc(user.uid).get();
+      if (!doc.exists) {
+        const username = 'user' + Math.floor(Math.random() * 99999);
+        await db.collection('users').doc(user.uid).set({
+          uid: user.uid,
+          name: user.displayName || 'User',
+          username: username,
+          email: user.email || '',
+          bio: '',
+          avatar: user.photoURL || '',
+          photos: [],
+          verified: false,
+          frozen: false,
+          online: true,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastSeen: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
-      toast('Добро пожаловать! 🏮','ok');
-    } catch(e){toast('Ошибка Google входа');}
+      toast('Добро пожаловать! 🏮', 'ok');
+    } catch (e) {
+      toast('Ошибка Google входа: ' + e.message);
+    }
   }
 
-  document.addEventListener('keydown',e=>{if(e.key==='Enter')handleSubmit();});
-  if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleSubmit();
+  });
+  
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
 </script>
 </body>
 </html>
