@@ -1,211 +1,227 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-  <title>Keyji — Профиль</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    :root{--orange:#FF6B00}
-    body{font-family:'Montserrat',sans-serif;min-height:100vh;background:#f5f0eb;overflow-x:hidden}
-    body.dark{background:#0a0a0a}
-    .bg{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center}
-    body.light .bg{background-image:url('https://i.ibb.co/zTS53bWc/file-000000004b807246a5c9c164255caecf.jpg')}
-    body.dark .bg{background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg')}
-    body.light .bgo{background:rgba(255,255,255,.2)}
-    body.dark .bgo{background:rgba(0,0,0,.5)}
-    .bgo{position:fixed;inset:0;z-index:1}
-    .app{position:relative;z-index:2;min-height:100vh;padding-bottom:40px}
-    .header{display:flex;align-items:center;justify-content:space-between;padding:52px 16px 16px;position:sticky;top:0;z-index:10;background:rgba(255,255,255,.5);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.6)}
-    body.dark .header{background:rgba(0,0,0,.55);border-bottom-color:rgba(255,255,255,.08)}
-    .back{width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.3);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:#333;transition:.2s}
-    body.dark .back{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white}
-    .htitle{font-family:'Noto Serif JP',serif;font-size:20px;font-weight:700;color:#1a1a1a}
-    body.dark .htitle{color:white}
-    .ebtn{padding:8px 16px;border-radius:12px;border:1px solid rgba(255,107,0,.3);background:rgba(255,107,0,.1);color:var(--orange);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
-    .ebtn:active{background:rgba(255,107,0,.2);transform:scale(.95)}
-    .avsec{display:flex;flex-direction:column;align-items:center;padding:32px 16px 24px;position:relative}
-    .avwrap{position:relative;width:110px;height:110px}
-    .avmain{width:110px;height:110px;border-radius:30px;background:linear-gradient(135deg,var(--orange),#ff3d00);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.5);box-shadow:0 8px 32px rgba(255,107,0,.3);cursor:pointer;overflow:hidden}
-    .avmain img{width:100%;height:100%;object-fit:cover}
-    .avcnt{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;backdrop-filter:blur(8px)}
-    .avdots{display:flex;gap:4px;margin-top:20px}
-    .avdot{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.15);transition:.2s}
-    body.dark .avdot{background:rgba(255,255,255,.2)}
-    .avdot.active{background:var(--orange);width:16px;border-radius:3px}
-    .pname{font-family:'Noto Serif JP',serif;font-size:24px;font-weight:700;color:#1a1a1a;margin-top:14px;text-align:center;display:flex;align-items:center;gap:8px}
-    body.dark .pname{color:white}
-    .vbadge{width:22px;height:22px;border-radius:50%;background:white;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-    .vbadge svg{width:14px;height:14px}
-    .pusr{font-size:14px;color:var(--orange);font-weight:600;margin-top:4px}
-    .pbio{font-size:13px;color:#888;margin-top:6px;text-align:center;line-height:1.5;max-width:260px}
-    body.dark .pbio{color:rgba(255,255,255,.45)}
-    .stats{display:flex;gap:12px;margin:0 16px 8px}
-    .stat{flex:1;padding:16px 12px;border-radius:16px;text-align:center;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.7);backdrop-filter:blur(12px)}
-    body.dark .stat{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
-    .snum{font-size:20px;font-weight:700;color:#1a1a1a}
-    body.dark .snum{color:white}
-    .slbl{font-size:11px;color:#999;margin-top:2px;font-weight:500}
-    body.dark .slbl{color:rgba(255,255,255,.35)}
-    .acts{display:flex;gap:10px;margin:0 16px 16px}
-    .abt{flex:1;padding:13px;border-radius:14px;border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.55);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:.2s}
-    body.dark .abt{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
-    .abt:active{transform:scale(.95)}
-    .abt.primary{background:var(--orange);border-color:var(--orange)}
-    .aicon{font-size:20px}
-    .albl{font-size:11px;font-weight:600;color:#555}
-    body.dark .albl{color:rgba(255,255,255,.6)}
-    .abt.primary .albl{color:white}
-    .sec{margin:8px 16px 0}
-    .sectitle{font-size:11px;font-weight:700;color:var(--orange);letter-spacing:1.5px;text-transform:uppercase;padding:12px 4px 8px}
-    .seccard{background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.7);backdrop-filter:blur(16px);border-radius:18px;overflow:hidden}
-    body.dark .seccard{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
-    .iitem{display:flex;align-items:center;gap:14px;padding:14px 16px;position:relative;transition:background .15s}
-    .iitem:not(:last-child)::after{content:'';position:absolute;bottom:0;left:54px;right:0;height:1px;background:rgba(0,0,0,.06)}
-    body.dark .iitem:not(:last-child)::after{background:rgba(255,255,255,.06)}
-    .iiicon{font-size:22px}
-    .iicont{flex:1}
-    .iilbl{font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
-    .iival{font-size:14px;font-weight:600;color:#1a1a1a}
-    body.dark .iival{color:rgba(255,255,255,.9)}
-    .modal-ov{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:none;align-items:flex-end}
-    .modal-ov.show{display:flex}
-    .modal{width:100%;background:rgba(255,255,255,.97);backdrop-filter:blur(30px);border-radius:24px 24px 0 0;padding:24px 20px 44px;animation:su .35s ease}
-    body.dark .modal{background:rgba(18,18,18,.98)}
-    @keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
-    .mhandle{width:36px;height:4px;border-radius:2px;background:#ddd;margin:0 auto 20px}
-    body.dark .mhandle{background:#444}
-    .mtitle{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:20px}
-    body.dark .mtitle{color:white}
-    .minput{width:100%;padding:14px 16px;border-radius:14px;margin-bottom:12px;border:1px solid rgba(0,0,0,.1);background:rgba(255,255,255,.8);font-family:'Montserrat',sans-serif;font-size:14px;color:#1a1a1a;outline:none}
-    body.dark .minput{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:white}
-    .minput:focus{border-color:var(--orange)}
-    .msave{width:100%;padding:15px;border-radius:14px;border:none;background:var(--orange);color:white;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;transition:.2s}
-    .msave:active{background:#FF8C38;transform:scale(.98)}
-    @keyframes petalFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
-    .petal{position:fixed;z-index:9999;pointer-events:none;animation:petalFall linear forwards}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>Keyji — Профиль</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--o:#FF6B00}
+body{font-family:'Montserrat',sans-serif;min-height:100vh;overflow-x:hidden}
+body.light{background:#f5f0eb}body.dark{background:#0a0a0a}
+.bg{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center}
+body.light .bg{background-image:url('https://i.ibb.co/zTS53bWc/file-000000004b807246a5c9c164255caecf.jpg')}
+body.dark .bg{background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg')}
+body.light .bgo{background:rgba(255,255,255,.2)}
+body.dark .bgo{background:rgba(0,0,0,.5)}
+.bgo{position:fixed;inset:0;z-index:1}
+.app{position:relative;z-index:2;min-height:100vh;padding-bottom:40px}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:52px 16px 14px;position:sticky;top:0;z-index:10;background:rgba(255,255,255,.55);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.6)}
+body.dark .hdr{background:rgba(0,0,0,.6);border-bottom-color:rgba(255,255,255,.08)}
+.back{width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:#333;transition:.2s}
+body.dark .back{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:white}
+.back:active{transform:scale(.92)}
+.htitle{font-family:'Noto Serif JP',serif;font-size:20px;font-weight:700;color:#1a1a1a}
+body.dark .htitle{color:white}
+.ebtn{padding:8px 16px;border-radius:12px;border:1px solid rgba(255,107,0,.3);background:rgba(255,107,0,.1);color:var(--o);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.ebtn:active{transform:scale(.95)}
+.avsec{display:flex;flex-direction:column;align-items:center;padding:28px 16px 20px}
+.avwrap{position:relative;width:110px;height:110px;cursor:pointer}
+.avmain{width:110px;height:110px;border-radius:28px;background:linear-gradient(135deg,var(--o),#ff3d00);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.5);box-shadow:0 8px 32px rgba(255,107,0,.25);overflow:hidden}
+.avmain img{width:100%;height:100%;object-fit:cover}
+.avedit{position:absolute;bottom:-4px;right:-4px;width:28px;height:28px;border-radius:50%;background:var(--o);color:white;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid white}
+.pname{font-family:'Noto Serif JP',serif;font-size:24px;font-weight:700;color:#1a1a1a;margin-top:14px;display:flex;align-items:center;gap:7px}
+body.dark .pname{color:white}
+.vbdg{width:22px;height:22px;border-radius:50%;background:white;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.vbdg svg{width:14px;height:14px}
+.pusr{font-size:14px;color:var(--o);font-weight:600;margin-top:4px}
+.pbio{font-size:13px;color:#888;margin-top:6px;text-align:center;line-height:1.5;max-width:260px}
+body.dark .pbio{color:rgba(255,255,255,.45)}
+.stats{display:flex;gap:10px;margin:0 16px 12px}
+.stat{flex:1;padding:14px 10px;border-radius:16px;text-align:center;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.7);backdrop-filter:blur(12px)}
+body.dark .stat{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
+.snum{font-size:20px;font-weight:700;color:#1a1a1a}
+body.dark .snum{color:white}
+.slbl{font-size:11px;color:#999;margin-top:2px;font-weight:500}
+body.dark .slbl{color:rgba(255,255,255,.35)}
+.sec{margin:0 16px 8px}
+.stitle{font-size:11px;font-weight:700;color:var(--o);letter-spacing:1.5px;text-transform:uppercase;padding:10px 4px 8px}
+.scard{background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.7);backdrop-filter:blur(16px);border-radius:18px;overflow:hidden}
+body.dark .scard{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
+.irow{display:flex;align-items:center;gap:14px;padding:13px 16px;position:relative}
+.irow:not(:last-child)::after{content:'';position:absolute;bottom:0;left:50px;right:0;height:1px;background:rgba(0,0,0,.06)}
+body.dark .irow:not(:last-child)::after{background:rgba(255,255,255,.06)}
+.iico{font-size:20px}
+.icont{flex:1}
+.ilbl{font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.ival{font-size:14px;font-weight:600;color:#1a1a1a}
+body.dark .ival{color:rgba(255,255,255,.9)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin:0 16px;border-radius:16px;overflow:hidden}
+.pthumb{aspect-ratio:1;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;overflow:hidden;position:relative}
+.pthumb img{width:100%;height:100%;object-fit:cover}
+.pthumb:active{opacity:.8}
+.pdel{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(229,57,53,.8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;cursor:pointer;z-index:1}
+.mo{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);display:none;align-items:flex-end}
+.mo.show{display:flex}
+.mc{width:100%;background:rgba(255,255,255,.97);border-radius:24px 24px 0 0;padding:24px 20px 44px;animation:su .35s ease}
+body.dark .mc{background:rgba(18,18,18,.98)}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mh{width:36px;height:4px;border-radius:2px;background:#ddd;margin:0 auto 20px}
+.mt{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:16px}
+body.dark .mt{color:white}
+.mlbl{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600}
+.minp{width:100%;padding:14px 16px;border-radius:14px;border:1px solid rgba(0,0,0,.1);background:rgba(255,255,255,.9);font-family:'Montserrat',sans-serif;font-size:14px;color:#1a1a1a;outline:none;margin-bottom:12px}
+body.dark .minp{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:white}
+.minp:focus{border-color:var(--o)}
+.msave{width:100%;padding:15px;border-radius:14px;border:none;background:var(--o);color:white;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
+.msave:active{transform:scale(.98)}
+.mcancel{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(0,0,0,.1);background:transparent;font-family:'Montserrat',sans-serif;font-size:14px;color:#888;cursor:pointer;margin-top:8px}
+body.dark .mcancel{border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
+.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;font-family:'Montserrat',sans-serif;white-space:nowrap}
+.toast.show{opacity:1}
+.tok{background:#43a047;color:white}.terr{background:#e53935;color:white}
+@keyframes pf{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.petal{position:fixed;z-index:9999;pointer-events:none;animation:pf linear forwards}
+</style>
 </head>
 <body class="light">
 <div class="bg"></div><div class="bgo"></div>
+<div id="toast" class="toast"></div>
 <div class="app">
-  <div class="header">
+  <div class="hdr">
     <div style="display:flex;align-items:center;gap:12px">
-      <div class="back" onclick="location.href='./chats.html'">←</div>
+      <div class="back" onclick="go('chats.html')">←</div>
       <div class="htitle">Профиль</div>
     </div>
     <div class="ebtn" onclick="openEdit()">Изменить</div>
   </div>
   <div class="avsec">
-    <div class="avwrap">
-      <div class="avmain" id="av-main" onclick="nextPhoto()">?</div>
-      <div class="avcnt" id="av-cnt">1 / 1</div>
+    <div class="avwrap" onclick="addPhoto()">
+      <div class="avmain" id="avmain">?</div>
+      <div class="avedit">📷</div>
     </div>
-    <div class="avdots" id="av-dots"><div class="avdot active"></div></div>
-    <div class="pname" id="p-name">...</div>
-    <div class="pusr" id="p-usr">@...</div>
-    <div class="pbio" id="p-bio">...</div>
+    <div class="pname" id="pname">...</div>
+    <div class="pusr" id="pusr">@...</div>
+    <div class="pbio" id="pbio"></div>
   </div>
   <div class="stats">
-    <div class="stat"><div class="snum" id="s-photos">0</div><div class="slbl">Фото</div></div>
-    <div class="stat"><div class="snum" id="s-id">—</div><div class="slbl">ID</div></div>
+    <div class="stat"><div class="snum" id="sPhotos">0</div><div class="slbl">Фото</div></div>
+    <div class="stat"><div class="snum" id="sId" style="font-size:12px">—</div><div class="slbl">ID</div></div>
     <div class="stat"><div class="snum">0</div><div class="slbl">Подписчики</div></div>
   </div>
-  <div class="acts">
-    <div class="abt primary" onclick="openEdit()"><div class="aicon">✏️</div><div class="albl">Изменить</div></div>
-    <div class="abt" onclick="addPhoto()"><div class="aicon">📷</div><div class="albl">Фото</div></div>
-    <div class="abt"><div class="aicon">🔗</div><div class="albl">Поделиться</div></div>
-    <div class="abt"><div class="aicon">📷</div><div class="albl">QR-код</div></div>
-  </div>
   <div class="sec">
-    <div class="sectitle">Информация</div>
-    <div class="seccard">
-      <div class="iitem"><div class="iiicon">📧</div><div class="iicont"><div class="iilbl">Email</div><div class="iival" id="i-email">—</div></div></div>
-      <div class="iitem"><div class="iiicon">🌍</div><div class="iicont"><div class="iilbl">Страна</div><div class="iival">Скрыта</div></div></div>
-      <div class="iitem"><div class="iiicon">🟢</div><div class="iicont"><div class="iilbl">Статус</div><div class="iival" style="color:var(--orange)">В сети</div></div></div>
+    <div class="stitle">Информация</div>
+    <div class="scard">
+      <div class="irow"><div class="iico">📧</div><div class="icont"><div class="ilbl">Email</div><div class="ival" id="iEmail">—</div></div></div>
+      <div class="irow"><div class="iico">📱</div><div class="icont"><div class="ilbl">Телефон</div><div class="ival" id="iPhone">Не указан</div></div></div>
+      <div class="irow"><div class="iico">🆔</div><div class="icont"><div class="ilbl">ID аккаунта</div><div class="ival" id="iId" style="font-size:12px;word-break:break-all">—</div></div></div>
+      <div class="irow"><div class="iico">📅</div><div class="icont"><div class="ilbl">В Keyji с</div><div class="ival" id="iDate">—</div></div></div>
     </div>
+  </div>
+  <div class="sec" id="photoSec" style="display:none">
+    <div class="stitle">Фото (<span id="pCount">0</span>/100)</div>
+    <div class="pgrid" id="pgrid"></div>
   </div>
   <div style="height:40px"></div>
 </div>
-
-<div class="modal-ov" id="editModal" onclick="closeEdit(event)">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mtitle">Редактировать профиль</div>
-    <input class="minput" id="e-name" type="text" placeholder="Имя">
-    <input class="minput" id="e-username" type="text" placeholder="@username">
-    <textarea class="minput" id="e-bio" rows="3" placeholder="О себе..."></textarea>
-    <button class="msave" onclick="saveProfile()">Сохранить</button>
+<div class="mo" id="editMo" onclick="closeEditOut(event)">
+  <div class="mc">
+    <div class="mh"></div>
+    <div class="mt">Редактировать профиль</div>
+    <div class="mlbl">Имя</div>
+    <input class="minp" id="eName" type="text" placeholder="Ваше имя">
+    <div class="mlbl">Юзернейм (без @)</div>
+    <input class="minp" id="eUser" type="text" placeholder="username">
+    <div class="mlbl">О себе</div>
+    <textarea class="minp" id="eBio" rows="3" placeholder="Расскажи о себе..."></textarea>
+    <button class="msave" onclick="saveEdit()">Сохранить</button>
+    <button class="mcancel" onclick="closeEdit()">Отмена</button>
   </div>
 </div>
-
 <script>
-  const FC={apiKey:"AIzaSyDrWwIDh_Y8Fji0KWiVbR2EcmUHl5c6mHM",authDomain:"keyji-974fb.firebaseapp.com",projectId:"keyji-974fb",storageBucket:"keyji-974fb.firebasestorage.app",messagingSenderId:"442818696289",appId:"1:442818696289:web:5ed15e6e31fb85ef2bc620"};
-  if(!firebase.apps.length)firebase.initializeApp(FC);
-  const auth=firebase.auth();const db=firebase.firestore();const storage=firebase.storage();
-  let me=null,userData=null,photos=[],photoIdx=0;
-  let isDark=localStorage.getItem('keyji_theme')==='dark';
-  if(isDark)document.body.className='dark';
-
-  auth.onAuthStateChanged(async user=>{
-    if(!user){window.location.href='./index.html';return;}
-    me=user;
-    const d=await db.collection('users').doc(user.uid).get();
-    if(d.exists){
-      userData=d.data();
-      document.getElementById('p-name').innerHTML=userData.name+(userData.verified?'<span class="vbadge"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#FF6B00"/><path d="M4 7l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>':'');
-      document.getElementById('p-usr').textContent='@'+(userData.username||'');
-      document.getElementById('p-bio').textContent=userData.bio||'Привет, я использую Keyji!';
-      document.getElementById('i-email').textContent=userData.hideEmail?'Скрыт':(userData.email||'—');
-      document.getElementById('s-id').textContent=user.uid.slice(0,6).toUpperCase();
-      photos=userData.photos||[];
-      if(userData.avatar){const img=document.createElement('img');img.src=userData.avatar;document.getElementById('av-main').innerHTML='';document.getElementById('av-main').appendChild(img);}
-      else document.getElementById('av-main').textContent=(userData.name||'?')[0].toUpperCase();
-      document.getElementById('s-photos').textContent=photos.length||1;
-      document.getElementById('av-cnt').textContent='1 / '+(photos.length||1);
-    }
-  });
-
-  function nextPhoto(){photoIdx=(photoIdx+1)%(photos.length||1);}
-
-  function openEdit(){
-    document.getElementById('e-name').value=userData?.name||'';
-    document.getElementById('e-username').value=userData?.username||'';
-    document.getElementById('e-bio').value=userData?.bio||'';
-    document.getElementById('editModal').classList.add('show');
+const FC={apiKey:"AIzaSyDrWwIDh_Y8Fji0KWiVbR2EcmUHl5c6mHM",authDomain:"keyji-974fb.firebaseapp.com",projectId:"keyji-974fb",storageBucket:"keyji-974fb.firebasestorage.app",messagingSenderId:"442818696289",appId:"1:442818696289:web:5ed15e6e31fb85ef2bc620"};
+firebase.initializeApp(FC);
+const auth=firebase.auth(),db=firebase.firestore();
+let me=null,ud={};
+let isDark=localStorage.getItem('keyji_theme')==='dark';
+if(isDark)document.body.className='dark';else document.body.className='light';
+auth.onAuthStateChanged(async u=>{if(!u){go('index.html');return;}me=u;await loadProfile();await db.collection('users').doc(me.uid).update({online:true});});
+async function loadProfile(){
+  const d=await db.collection('users').doc(me.uid).get();
+  if(!d.exists)return;
+  ud=d.data();
+  const av=document.getElementById('avmain');
+  if(ud.avatar)av.innerHTML=`<img src="${ud.avatar}">`;else av.textContent=(ud.name||'?')[0].toUpperCase();
+  let nh=esc(ud.name||'');
+  if(ud.verified)nh+=`<span class="vbdg"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#FF6B00"/><path d="M4 7l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+  document.getElementById('pname').innerHTML=nh;
+  document.getElementById('pusr').textContent='@'+(ud.username||'');
+  document.getElementById('pbio').textContent=ud.bio||'';
+  document.getElementById('iEmail').textContent=ud.hideEmail?'Скрыт':(ud.email||'—');
+  document.getElementById('iPhone').textContent=ud.phone||'Не указан';
+  document.getElementById('iId').textContent=me.uid;
+  document.getElementById('sId').textContent=me.uid.slice(0,8).toUpperCase();
+  if(ud.createdAt){const dt=new Date(ud.createdAt.toDate());document.getElementById('iDate').textContent=dt.toLocaleDateString('ru',{month:'long',year:'numeric'});}
+  const photos=ud.photos||[];
+  document.getElementById('sPhotos').textContent=photos.length||1;
+  document.getElementById('pCount').textContent=photos.length;
+  if(photos.length>0){
+    document.getElementById('photoSec').style.display='block';
+    const g=document.getElementById('pgrid');g.innerHTML='';
+    photos.forEach((url,i)=>{const el=document.createElement('div');el.className='pthumb';el.innerHTML=`<img src="${url}"><div class="pdel" onclick="delPhoto(${i},event)">✕</div>`;el.onclick=()=>window.open(url);g.appendChild(el);});
   }
-  function closeEdit(e){if(e.target===document.getElementById('editModal'))document.getElementById('editModal').classList.remove('show');}
-
-  async function saveProfile(){
-    const name=document.getElementById('e-name').value.trim();
-    const username=document.getElementById('e-username').value.trim().replace('@','').toLowerCase();
-    const bio=document.getElementById('e-bio').value.trim();
-    if(!name)return;
-    await db.collection('users').doc(me.uid).update({name,username,bio});
+}
+function openEdit(){document.getElementById('eName').value=ud.name||'';document.getElementById('eUser').value=ud.username||'';document.getElementById('eBio').value=ud.bio||'';document.getElementById('editMo').classList.add('show');}
+function closeEdit(){document.getElementById('editMo').classList.remove('show');}
+function closeEditOut(e){if(e.target===document.getElementById('editMo'))closeEdit();}
+async function saveEdit(){
+  const name=document.getElementById('eName').value.trim();
+  const uname=document.getElementById('eUser').value.trim().replace(/[@\s]/g,'').toLowerCase();
+  const bio=document.getElementById('eBio').value.trim();
+  if(!name){toast('Введите имя','terr');return;}
+  if(uname.length<3){toast('Юзернейм минимум 3 символа','terr');return;}
+  try{
+    if(uname!==ud.username){const q=await db.collection('users').where('username','==',uname).get();if(!q.empty){toast('Юзернейм уже занят','terr');return;}}
+    await db.collection('users').doc(me.uid).update({name,username:uname,bio});
     await me.updateProfile({displayName:name});
-    document.getElementById('editModal').classList.remove('show');
-    spawnPetals();
-    location.reload();
-  }
-
-  async function addPhoto(){
-    const input=document.createElement('input');input.type='file';input.accept='image/*';
-    input.onchange=async e=>{
-      const file=e.target.files[0];if(!file)return;
-      const ref=storage.ref('avatars/'+me.uid+'/'+Date.now());
-      await ref.put(file);const url=await ref.getDownloadURL();
-      const newPhotos=[url,...(userData?.photos||[])].slice(0,100);
-      await db.collection('users').doc(me.uid).update({avatar:url,photos:newPhotos});
-      spawnPetals();location.reload();
-    };input.click();
-  }
-
-  function spawnPetals(){for(let i=0;i<18;i++){setTimeout(()=>{const p=document.createElement('div');p.className='petal';p.textContent=['🌸','🌺','🍃','✨'][Math.floor(Math.random()*4)];p.style.cssText=`left:${Math.random()*100}vw;top:-30px;font-size:${12+Math.random()*14}px;animation-duration:${2+Math.random()*3}s`;document.body.appendChild(p);setTimeout(()=>p.remove(),5000);},i*80);}}
+    ud.name=name;ud.username=uname;ud.bio=bio;
+    closeEdit();await loadProfile();spawnPetals();toast('Сохранено ✓','tok');
+  }catch(e){toast(e.message,'terr');}
+}
+function addPhoto(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=async e=>{
+    const file=e.target.files[0];if(!file)return;
+    if(file.size>2*1024*1024){toast('Фото не более 2МБ','terr');return;}
+    const reader=new FileReader();
+    reader.onload=async ev=>{
+      const photos=ud.photos||[];
+      if(photos.length>=100){toast('Максимум 100 фото','terr');return;}
+      photos.unshift(ev.target.result);
+      await db.collection('users').doc(me.uid).update({avatar:photos[0],photos});
+      ud.photos=photos;ud.avatar=photos[0];
+      spawnPetals();await loadProfile();toast('Фото добавлено ✓','tok');
+    };
+    reader.readAsDataURL(file);
+  };
+  inp.click();
+}
+async function delPhoto(i,e){
+  e.stopPropagation();
+  if(!confirm('Удалить фото?'))return;
+  const photos=ud.photos||[];photos.splice(i,1);
+  const nav=photos[0]||'';
+  await db.collection('users').doc(me.uid).update({avatar:nav,photos});
+  ud.photos=photos;ud.avatar=nav;await loadProfile();toast('Удалено','tok');
+}
+function spawnPetals(){for(let i=0;i<16;i++){setTimeout(()=>{const p=document.createElement('div');p.className='petal';p.textContent=['🌸','🌺','🍃','✨'][Math.floor(Math.random()*4)];p.style.cssText=`left:${Math.random()*100}vw;top:-30px;font-size:${12+Math.random()*14}px;animation-duration:${2+Math.random()*3}s`;document.body.appendChild(p);setTimeout(()=>p.remove(),5000);},i*80);}}
+function toast(m,c){const t=document.getElementById('toast');t.textContent=m;t.className='toast show '+c;setTimeout(()=>t.classList.remove('show'),3000);}
+function go(p){location.href='./'+p;}
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
 </html>
