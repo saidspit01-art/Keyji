@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>Keyji</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--o:#FF6B00}
+body{font-family:'Montserrat',sans-serif;min-height:100vh;overflow:hidden;background:#0a0a0a}
+.bg{position:fixed;inset:0;background-image:url('https://i.ibb.co/Pv1Y3F9T/file-0000000062f47246b948af6a043288a5.jpg');background-size:cover;background-position:center;z-index:0}
+.ov{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(0,0,0,.78));z-index:1}
+.wrap{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px}
+.slide{display:none;flex-direction:column;align-items:center;text-align:center;animation:si .5s ease both}
+.slide.active{display:flex}
+@keyframes si{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.se{font-size:96px;margin-bottom:28px;animation:fl 3s ease-in-out infinite;filter:drop-shadow(0 8px 32px rgba(255,107,0,.3))}
+.sk{font-family:'Noto Serif JP',serif;font-size:96px;font-weight:700;margin-bottom:28px;background:linear-gradient(135deg,#fff 30%,var(--o));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fl 3s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.st{font-family:'Noto Serif JP',serif;font-size:26px;font-weight:700;color:white;margin-bottom:12px}
+.sd{font-size:15px;color:rgba(255,255,255,.6);line-height:1.7;max-width:280px}
+.dots{position:fixed;bottom:155px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:3}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);transition:.3s;cursor:pointer}
+.dot.active{background:var(--o);width:24px;border-radius:4px}
+.nxt{position:fixed;bottom:56px;left:32px;right:32px;padding:17px;border-radius:18px;border:none;background:var(--o);color:white;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;cursor:pointer;z-index:3;box-shadow:0 8px 32px rgba(255,107,0,.35);transition:.2s}
+.nxt:active{transform:scale(.97)}
+.skip{position:fixed;top:52px;right:22px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:20px;cursor:pointer;z-index:3;-webkit-tap-highlight-color:transparent}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="ov"></div>
+<button class="skip" onclick="finish()">Пропустить</button>
+<div class="wrap">
+  <div class="slide active" id="s0">
+    <div class="se">🏮</div>
+    <div class="st">Твоё пространство</div>
+    <div class="sd">Общайся в атмосфере японского спокойствия — красиво, удобно, без лишнего</div>
+  </div>
+  <div class="slide" id="s1">
+    <div class="se">🌸</div>
+    <div class="st">Красота в деталях</div>
+    <div class="sd">Каждый чат — как цветок сакуры. Неповторимый, живой, настоящий</div>
+  </div>
+  <div class="slide" id="s2">
+    <div class="se">🍡</div>
+    <div class="st">Просто и вкусно</div>
+    <div class="sd">Интерфейс без лишнего — только то, что нужно. Всё под рукой</div>
+  </div>
+  <div class="slide" id="s3">
+    <div class="se">🎋</div>
+    <div class="st">Расти вместе</div>
+    <div class="sd">Боты, каналы, группы — всё в одном месте. Создавай своё сообщество</div>
+  </div>
+  <div class="slide" id="s4">
+    <div class="sk">K</div>
+    <div class="st">Добро пожаловать в Keyji</div>
+    <div class="sd">Начни общение по-новому. Твой мессенджер. Твои правила</div>
+  </div>
+</div>
+<div class="dots" id="dots">
+  <div class="dot active"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+</div>
+<button class="nxt" id="nxt" onclick="next()">Далее</button>
+<script>
+let c=0;
+const tot=5;
+function goTo(n){
+  document.getElementById('s'+c).classList.remove('active');
+  document.querySelectorAll('.dot')[c].classList.remove('active');
+  c=n;
+  document.getElementById('s'+c).classList.add('active');
+  document.querySelectorAll('.dot')[c].classList.add('active');
+  document.getElementById('nxt').textContent=c===tot-1?'Начать':'Далее';
+}
+function next(){c<tot-1?goTo(c+1):finish();}
+function finish(){
+  localStorage.setItem('keyji_ob','1');
+  location.href='./chats.html';
+}
+document.querySelectorAll('.dot').forEach((d,i)=>d.addEventListener('click',()=>goTo(i)));
+let sx=0;
+document.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{
+  const d=sx-e.changedTouches[0].clientX;
+  if(Math.abs(d)>50){if(d>0&&c<tot-1)goTo(c+1);if(d<0&&c>0)goTo(c-1);}
+});
+</script>
+</body>
+</html>
