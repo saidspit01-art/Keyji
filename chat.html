@@ -354,6 +354,17 @@ function pickFile(){
 function startCall(t){alert(t==='voice'?'📞 Голосовой звонок...':'📹 Видеозвонок...');}
 
 function spawnPetals(){
+  for(let i=0;i<20;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');p.className='petal';
+      p.textContent=['🌸','🌺','🍃','✨'][Math.floor(Math.random()*4)];
+      p.style.cssText=`left:${Math.random()*100}vw;top:-30px;font-size:${12+Math.random()*14}px;animation-duration:${2+Math.random()*3}s`;
+      document.body.appendChild(p);setTimeout(()=>p.remove(),5000);
+    },i*100);
+  }
+}
+
+function go(p){location.href='./'+p;}
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
