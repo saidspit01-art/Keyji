@@ -204,6 +204,7 @@ function loadMsgs(){
       let lastDate='';
       snap.forEach(d=>{
         const m={id:d.id,...d.data()};
+        // Полностью скрываем удалённые у себя
         if(m.deletedFor===me.uid)return;
         if(m.timestamp){
           const dt=new Date(m.timestamp.toDate()).toLocaleDateString('ru',{day:'numeric',month:'long'});
@@ -216,14 +217,23 @@ function loadMsgs(){
           }
         }
         renderMsg(m,div);
-        if(m.autoDeleteAt&&m.type!=='deleted'){
+        // Автоудаление
+        if(m.autoDeleteAt){
           const at=m.autoDeleteAt.toDate?m.autoDeleteAt.toDate():new Date(m.autoDeleteAt);
           const left=at-Date.now();
-          if(left<=0)delMsg_(m.id);
-          else setTimeout(()=>{delMsg_(m.id);spawnPetals();},left);
+          if(left<=0){
+            db.collection('chats').doc(chatId).collection('messages').doc(m.id).delete();
+            spawnPetals();
+          } else {
+            setTimeout(async()=>{
+              await db.collection('chats').doc(chatId).collection('messages').doc(m.id).delete();
+              spawnPetals();
+            },left);
+          }
         }
       });
       div.scrollTop=div.scrollHeight;
+      // Отмечаем как прочитанные
       if(chatId&&otherUid){
         db.collection('chats').doc(chatId).collection('messages')
           .where('senderId','==',otherUid).where('status','!=','read')
@@ -240,8 +250,7 @@ function renderMsg(m,div){
   const t=m.timestamp?new Date(m.timestamp.toDate()).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}):'';
   let c='';
   if(m.replyTo)c+=`<div class="rprev"><div class="rpn">Ответ</div><div class="rpt">${esc(m.replyTo)}</div></div>`;
-  if(m.type==='deleted')c+=`<div class="mt" style="opacity:.5;font-style:italic">🗑 Удалено</div>`;
-  else if(m.type==='image')c+=`<img src="${m.fileUrl}" style="max-width:100%;border-radius:12px;cursor:pointer;display:block" onclick="window.open('${m.fileUrl}')">`;
+  if(m.type==='image')c+=`<img src="${m.fileUrl}" style="max-width:100%;border-radius:12px;cursor:pointer;display:block" onclick="window.open('${m.fileUrl}')">`;
   else if(m.type==='video_circle')c+=`<div class="vcircle"><video src="${m.fileUrl}" controls playsinline></video></div>`;
   else c+=`<div class="mt">${esc(m.text||'')}</div>`;
   c+=`<div class="mm"><span class="mtime">${t}</span>`;
@@ -253,7 +262,7 @@ function renderMsg(m,div){
     Object.entries(m.reactions).forEach(([e,n])=>{c+=`<div class="react" onclick="addReact('${m.id}','${e}')">${e}<span class="rct">${n}</span></div>`;});
     c+='</div>';
   }
-  if(m.autoDeleteAt&&m.type!=='deleted'){
+  if(m.autoDeleteAt){
     const at=m.autoDeleteAt.toDate?m.autoDeleteAt.toDate():new Date(m.autoDeleteAt);
     const s=Math.max(0,Math.floor((at-Date.now())/1000));
     c+=`<div class="adtag">⏱ ${s}с</div>`;
@@ -276,10 +285,26 @@ async function sendMsg(){
   const txt=box.value.trim();
   if(!txt||!chatId)return;
   box.value='';box.style.height='auto';
-  const data={senderId:me.uid,text:txt,type:'text',timestamp:firebase.firestore.FieldValue.serverTimestamp(),status:'sent',edited:false,reactions:{},replyTo:replyId?replyTxt:null,autoDeleteAt:autoDelSec?new Date(Date.now()+autoDelSec*1000):null};
+  const data={
+    senderId:me.uid,
+    text:txt,
+    type:'text',
+    timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+    status:'sent',
+    edited:false,
+    reactions:{},
+    replyTo:replyId?replyTxt:null,
+    autoDeleteAt:autoDelSec?new Date(Date.now()+autoDelSec*1000):null
+  };
   closeReply();
   const ref=await db.collection('chats').doc(chatId).collection('messages').add(data);
-  await db.collection('chats').doc(chatId).update({lastMessage:txt,lastMessageTime:firebase.firestore.FieldValue.serverTimestamp(),lastSenderId:me.uid});
+  // Обновляем чат — чтобы у обоих появился в списке
+  await db.collection('chats').doc(chatId).update({
+    lastMessage:txt,
+    lastMessageTime:firebase.firestore.FieldValue.serverTimestamp(),
+    lastSenderId:me.uid,
+    participants:[me.uid,otherUid]
+  });
   setTimeout(()=>ref.update({status:'delivered'}),1200);
 }
 
@@ -303,6 +328,7 @@ function replyCtx(){
   if(el){replyId=ctxId;replyTxt=el.textContent;document.getElementById('rbar').classList.add('show');document.getElementById('rbt').textContent=el.textContent;document.getElementById('ibox').focus();}
   closeCtx();
 }
+
 async function editCtx(){
   if(!ctxOut){closeCtx();return;}
   const el=document.querySelector(`[data-id="${ctxId}"] .mt`);
@@ -311,26 +337,33 @@ async function editCtx(){
   if(nt&&nt.trim())await db.collection('chats').doc(chatId).collection('messages').doc(ctxId).update({text:nt.trim(),edited:true});
   closeCtx();
 }
+
 async function reactCtx(){
   const emojis=['❤️','🔥','😂','👍','🌸','✨','😮','😢'];
   const e=emojis[Math.floor(Math.random()*emojis.length)];
   await addReact(ctxId,e);closeCtx();
 }
+
 async function addReact(mid,emoji){
   const ref=db.collection('chats').doc(chatId).collection('messages').doc(mid);
   const d=await ref.get();if(!d.exists)return;
   const r=d.data().reactions||{};r[emoji]=(r[emoji]||0)+1;
   await ref.update({reactions:r});
 }
+
 function adForMsg(){closeCtx();showADM();}
+
 async function delCtx(all){
-  if(all)await db.collection('chats').doc(chatId).collection('messages').doc(ctxId).update({text:'',type:'deleted',fileUrl:''});
-  else await db.collection('chats').doc(chatId).collection('messages').doc(ctxId).update({deletedFor:me.uid});
+  if(all){
+    // Полностью удаляем у всех
+    await db.collection('chats').doc(chatId).collection('messages').doc(ctxId).delete();
+  } else {
+    // Только у себя — помечаем
+    await db.collection('chats').doc(chatId).collection('messages').doc(ctxId).update({deletedFor:me.uid});
+  }
   closeCtx();
 }
-async function delMsg_(mid){
-  await db.collection('chats').doc(chatId).collection('messages').doc(mid).update({text:'',type:'deleted',fileUrl:''});
-}
+
 function showADM(){document.getElementById('adm').classList.add('show');}
 function setAD(s){autoDelSec=s;closeADM();}
 function closeADM(){document.getElementById('adm').classList.remove('show');}
@@ -343,8 +376,17 @@ function pickFile(){
     const reader=new FileReader();
     reader.onload=async ev=>{
       const type=file.type.startsWith('video')?'video_circle':'image';
-      await db.collection('chats').doc(chatId).collection('messages').add({senderId:me.uid,text:'',type,fileUrl:ev.target.result,timestamp:firebase.firestore.FieldValue.serverTimestamp(),status:'sent',edited:false,reactions:{},replyTo:null,autoDeleteAt:autoDelSec?new Date(Date.now()+autoDelSec*1000):null});
-      await db.collection('chats').doc(chatId).update({lastMessage:'📎 Файл',lastMessageTime:firebase.firestore.FieldValue.serverTimestamp()});
+      await db.collection('chats').doc(chatId).collection('messages').add({
+        senderId:me.uid,text:'',type,fileUrl:ev.target.result,
+        timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+        status:'sent',edited:false,reactions:{},replyTo:null,
+        autoDeleteAt:autoDelSec?new Date(Date.now()+autoDelSec*1000):null
+      });
+      await db.collection('chats').doc(chatId).update({
+        lastMessage:'📎 Файл',
+        lastMessageTime:firebase.firestore.FieldValue.serverTimestamp(),
+        participants:[me.uid,otherUid]
+      });
     };
     reader.readAsDataURL(file);
   };
