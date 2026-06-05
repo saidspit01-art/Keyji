@@ -23,14 +23,14 @@ body.dark .bgo{background:rgba(0,0,0,.38)}
 .app{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column}
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:52px 16px 12px;background:rgba(255,255,255,.5);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.6)}
 body.dark .hdr{background:rgba(0,0,0,.55);border-bottom-color:rgba(255,255,255,.08)}
-.mbtn{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.3);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.2s}
+.mbtn{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.3);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}
 body.dark .mbtn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
 .mbtn span{width:18px;height:2px;border-radius:2px;background:#333}
 body.dark .mbtn span{background:white}
 .mbtn:active{transform:scale(.92)}
 .htitle{font-family:'Noto Serif JP',serif;font-size:22px;font-weight:700;color:#1a1a1a}
 body.dark .htitle{color:white}
-.ibtn{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.3);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:.2s}
+.ibtn{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.3);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer}
 body.dark .ibtn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
 .ibtn:active{transform:scale(.92)}
 .sw{padding:8px 14px 6px}
@@ -64,13 +64,13 @@ body.dark .ci-t{color:rgba(255,255,255,.3)}
 .et{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
 body.dark .et{color:white}
 .es{font-size:13px;color:#999;line-height:1.6}
-.fab{position:fixed;bottom:calc(var(--nav)+18px);right:18px;width:52px;height:52px;border-radius:16px;background:var(--o);border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(255,107,0,.4);cursor:pointer;z-index:10;font-size:22px;color:white;transition:.2s}
+.fab{position:fixed;bottom:calc(var(--nav)+18px);right:18px;width:52px;height:52px;border-radius:16px;background:var(--o);border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(255,107,0,.4);cursor:pointer;z-index:10;font-size:22px;color:white}
 .fab:active{transform:scale(.92)}
 .bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);display:flex;align-items:center;background:rgba(255,255,255,.65);border-top:1px solid rgba(255,255,255,.7);backdrop-filter:blur(20px);z-index:10;padding-bottom:8px}
 body.dark .bnav{background:rgba(10,10,10,.8);border-top-color:rgba(255,255,255,.1)}
-.ni{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex:1;padding:6px;transition:.2s}
+.ni{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex:1;padding:6px}
 .ni:active{transform:scale(.92)}
-.nicon{font-size:22px;transition:transform .2s}
+.nicon{font-size:22px}
 .nlbl{font-size:10px;font-weight:600;color:#aaa}
 .ni.active .nlbl{color:var(--o)}
 .ni.active .nicon{transform:scale(1.1)}
@@ -98,7 +98,7 @@ body.dark .smil{color:rgba(255,255,255,.85)}
 body.dark .sdiv{background:rgba(255,255,255,.06)}
 .trow{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;cursor:pointer}
 .tl{display:flex;align-items:center;gap:13px}
-.tsw{width:44px;height:24px;border-radius:12px;background:#ddd;position:relative;transition:.3s;cursor:pointer}
+.tsw{width:44px;height:24px;border-radius:12px;background:#ddd;position:relative;transition:.3s}
 .tsw.on{background:var(--o)}
 .tk{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:white;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .tsw.on .tk{left:23px}
@@ -115,7 +115,7 @@ body.dark .mi{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12
 .mi:focus{border-color:var(--o)}
 .mcancel{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(0,0,0,.1);background:transparent;font-family:'Montserrat',sans-serif;font-size:14px;color:#888;cursor:pointer;margin-top:6px}
 body.dark .mcancel{border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
-.uc{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.04);margin-bottom:6px;cursor:pointer;transition:.15s}
+.uc{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.04);margin-bottom:6px;cursor:pointer}
 body.dark .uc{background:rgba(255,255,255,.06)}
 .uc:active{background:rgba(255,107,0,.1)}
 .ucav{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--o),#ff3d00);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:white;flex-shrink:0;overflow:hidden}
@@ -142,8 +142,8 @@ body.dark .ucn{color:white}
       <div class="tsw" id="tsw"><div class="tk"></div></div>
     </div>
     <div class="smi" onclick="go('settings.html')"><div class="smic">⚙️</div><div class="smil">Настройки</div></div>
-    <div class="smi" onclick="go('settings.html')"><div class="smic">🔒</div><div class="smil">Конфиденциальность</div></div>
     <div class="sdiv"></div>
+    <div class="smi" onclick="go('settings.html')"><div class="smic">🔒</div><div class="smil">Конфиденциальность</div></div>
     <div class="smi"><div class="smic">❓</div><div class="smil">Помощь</div></div>
     <div class="sdiv"></div>
     <div class="smi red" onclick="doLogout()"><div class="smic">🚪</div><div class="smil">Выйти</div></div>
@@ -160,15 +160,11 @@ body.dark .ucn{color:white}
   <div class="sw">
     <div class="sb">
       <span style="color:#aaa;font-size:15px">🔍</span>
-      <input id="sinp" type="text" placeholder="Поиск по @username..." oninput="findUser(this.value)">
+      <input id="sinp" type="text" placeholder="Поиск по @username..." oninput="searchUser(this.value)">
     </div>
   </div>
   <div class="cl" id="cl">
-    <div class="empty">
-      <div class="ei">💬</div>
-      <div class="et">Нет чатов</div>
-      <div class="es">Нажми ✏️ и найди человека<br>по @username</div>
-    </div>
+    <div class="empty"><div class="ei">💬</div><div class="et">Нет чатов</div><div class="es">Нажми ✏️ и найди человека<br>по @username</div></div>
   </div>
 </div>
 <button class="fab" onclick="openNC()">✏️</button>
@@ -201,18 +197,24 @@ auth.onAuthStateChanged(async u=>{
   const d=await db.collection('users').doc(u.uid).get();
   if(d.exists){
     const ud=d.data();
-    if(ud.frozen){alert('Ваш аккаунт заморожен. Обратитесь в @spamkeyjibot');await auth.signOut();go('index.html');return;}
+    if(ud.frozen){alert('Аккаунт заморожен. Обратитесь в @spamkeyjibot');await auth.signOut();go('index.html');return;}
     const av=document.getElementById('sdav');
     if(ud.avatar)av.innerHTML=`<img src="${ud.avatar}">`;
     else av.textContent=(ud.name||'?')[0].toUpperCase();
     document.getElementById('sdname').textContent=ud.name||'';
     document.getElementById('sdusr').textContent='@'+(ud.username||'');
+    // Онлайн статус
     await db.collection('users').doc(u.uid).update({online:true,lastSeen:firebase.firestore.FieldValue.serverTimestamp()});
+    // Когда закрывают страницу — офлайн
+    window.addEventListener('beforeunload',()=>{
+      db.collection('users').doc(u.uid).update({online:false,lastSeen:firebase.firestore.FieldValue.serverTimestamp()});
+    });
   }
   loadChats();
 });
 
 function loadChats(){
+  // Слушаем чаты где я участник
   db.collection('chats')
     .where('participants','array-contains',me.uid)
     .orderBy('lastMessageTime','desc')
@@ -225,32 +227,36 @@ function loadChats(){
       cl.innerHTML='';
       for(const d of snap.docs){
         const ch=d.data();
+        // Находим собеседника
         const oid=ch.participants.find(p=>p!==me.uid);
         if(!oid)continue;
-        const ud=await db.collection('users').doc(oid).get();
-        if(!ud.exists)continue;
-        const u=ud.data();
-        const t=ch.lastMessageTime?new Date(ch.lastMessageTime.toDate()).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}):'';
-        const el=document.createElement('div');
-        el.className='ci';
-        el.onclick=()=>{localStorage.setItem('kcid',d.id);localStorage.setItem('kcuid',oid);go('chat.html');};
-        const avH=u.avatar?`<img src="${u.avatar}">`:(u.name||'?')[0].toUpperCase();
-        const vBdg=u.verified?'<span class="vbdg"><svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#FF6B00"/><path d="M2.5 5l1.5 1.5 3-3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>':'';
-        el.innerHTML=`
-          <div class="av" style="background:linear-gradient(135deg,#FF6B00,#ff3d00)">${avH}${u.online?'<div class="odot"></div>':''}</div>
-          <div class="ci-info">
-            <div class="ci-name">${esc(u.name||'')}${vBdg}</div>
-            <div class="ci-prev">${esc(ch.lastMessage||'...')}</div>
-          </div>
-          <div class="ci-meta"><div class="ci-t">${t}</div></div>`;
-        cl.appendChild(el);
+        try{
+          const ud=await db.collection('users').doc(oid).get();
+          if(!ud.exists)continue;
+          const u=ud.data();
+          const t=ch.lastMessageTime?new Date(ch.lastMessageTime.toDate()).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}):'';
+          const el=document.createElement('div');
+          el.className='ci';
+          el.onclick=()=>{localStorage.setItem('kcid',d.id);localStorage.setItem('kcuid',oid);go('chat.html');};
+          const avH=u.avatar?`<img src="${u.avatar}">`:(u.name||'?')[0].toUpperCase();
+          const onlineDot=u.online?'<div class="odot"></div>':'';
+          const vBdg=u.verified?'<span class="vbdg"><svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#FF6B00"/><path d="M2.5 5l1.5 1.5 3-3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>':'';
+          el.innerHTML=`
+            <div class="av" style="background:linear-gradient(135deg,#FF6B00,#ff3d00)">${avH}${onlineDot}</div>
+            <div class="ci-info">
+              <div class="ci-name">${esc(u.name||'')}${vBdg}</div>
+              <div class="ci-prev">${esc(ch.lastMessage||'...')}</div>
+            </div>
+            <div class="ci-meta"><div class="ci-t">${t}</div></div>`;
+          cl.appendChild(el);
+        }catch(e){console.log(e);}
       }
     });
 }
 
 async function findUser(q){
   const res=document.getElementById('ures');
-  if(!q||q.length<2){res&&(res.innerHTML='');return;}
+  if(!q||q.length<2){if(res)res.innerHTML='';return;}
   const uname=q.replace('@','').toLowerCase();
   const snap=await db.collection('users').where('username','==',uname).limit(5).get();
   if(!res)return;
@@ -266,11 +272,23 @@ async function findUser(q){
   });
 }
 
+function searchUser(q){
+  // Поиск в открытом модале
+  findUser(q);
+}
+
 async function startChat(uid){
   const cid=[me.uid,uid].sort().join('_');
   const ref=db.collection('chats').doc(cid);
   const ex=await ref.get();
-  if(!ex.exists)await ref.set({participants:[me.uid,uid],lastMessage:'',lastMessageTime:firebase.firestore.FieldValue.serverTimestamp(),type:'private'});
+  if(!ex.exists){
+    await ref.set({
+      participants:[me.uid,uid],
+      lastMessage:'',
+      lastMessageTime:firebase.firestore.FieldValue.serverTimestamp(),
+      type:'private'
+    });
+  }
   localStorage.setItem('kcid',cid);
   localStorage.setItem('kcuid',uid);
   go('chat.html');
@@ -282,7 +300,11 @@ function closeNC2(){document.getElementById('ncm').classList.remove('show');docu
 function openSd(){document.getElementById('sd').classList.add('open');document.getElementById('sdo').classList.add('show');}
 function closeSd(){document.getElementById('sd').classList.remove('open');document.getElementById('sdo').classList.remove('show');}
 function toggleTheme(){isDark=!isDark;document.body.className=isDark?'dark':'light';document.getElementById('tsw').classList.toggle('on',isDark);localStorage.setItem('keyji_theme',isDark?'dark':'light');}
-async function doLogout(){if(me)await db.collection('users').doc(me.uid).update({online:false});await auth.signOut();go('index.html');}
+async function doLogout(){
+  if(me)await db.collection('users').doc(me.uid).update({online:false});
+  await auth.signOut();
+  go('index.html');
+}
 function go(p){location.href='./'+p;}
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 let sx=0;
